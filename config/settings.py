@@ -98,6 +98,9 @@ if USE_DOCKER:
             "PASSWORD": env("MYSQL_PASSWORD"),
             "HOST": env("MYSQL_HOST"),
             "PORT": env("MYSQL_PORT"),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
         }
     }
 else:
