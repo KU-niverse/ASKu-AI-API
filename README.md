@@ -11,6 +11,8 @@ DJANGO_SETTINGS_MODULE=config.settings pylint --load-plugins pylint_django
 
 ### 라이브러리 설정하기
 ```shell
+# 만약 안되면 아래를 넣어보시길
+> Set-ExecutionPolicy Unrestricted -Scope Process
 # 가상환경 만들기
 > python -m venv venv
 # 가상환경 활성화

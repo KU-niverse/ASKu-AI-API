@@ -1,23 +1,54 @@
 import openai
-from langchain.vectorstores.redis import Redis as RedisVectorStore
+from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
 
 vectorstores = ["Redis"]
+VDBurls = {"Redis": "redis://localhost:6379"}
 
-def getVectorStore(database: str):
+def createVectorstoreIndex(database: str, docs: list, index_name: str) -> None:
     if database not in vectorstores:
-        raise ValueError(f"{database} does not exist in vectorstores list")
+        raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
     
     if database == "Redis":
-        VectorStore = RedisVectorStore.from_existing_index(
+        Redis.from_documents(
+            documents=docs,
             embedding=OpenAIEmbeddings(),
-            redis_url="redis://localhost:6379",
-            index_name="ku_rule")
+            redis_url=VDBurls[database],
+            index_name=index_name
+            )
+        
+    return
+
+def deleteVectorstoreIndex(database: str, index_name: str) -> None:
+    if database not in vectorstores:
+        raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
+    
+    if database == "Reids":
+        result = Redis.drop_index(
+            index_name=index_name,
+            delete_documents=False,
+            redis_url=VDBurls[database]
+        )
+    
+    if not result:
+        raise Exception("Drop does not executed")
+    
+    return
+
+def getVectorStore(database: str, index_name: str = "ku_rules") -> Redis:
+    if database not in vectorstores:
+        raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
+    
+    if database == "Redis":
+        VectorStore = Redis.from_existing_index(
+            embedding=OpenAIEmbeddings(),
+            redis_url=VDBurls[database],
+            index_name=index_name)
     
     return VectorStore
 
 def getRelatedDocs(content: str, database="Redis"):
-    VectorStore = getVectorStore(database=database)
+    VectorStore = getVectorStore(database=database, index_name='ku_rules')
     
     RelatedDocs = []
     for documents in VectorStore.similarity_search(query=content):
