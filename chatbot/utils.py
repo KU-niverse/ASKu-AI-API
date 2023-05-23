@@ -15,7 +15,7 @@ def createVectorstoreIndex(database: str, texts: list[str], index_name: str) -> 
     
     if database == "Redis":
         Redis.from_texts(
-            texts=['abcd','efgh'],
+            texts=texts,
             embedding=OpenAIEmbeddings(),
             index_name=index_name,
             redis_url=os.getenv("REDIS_URL")
