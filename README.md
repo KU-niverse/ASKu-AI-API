@@ -7,6 +7,8 @@
 SECRET_KEY=your-secret-key
 DEBUG=True
 DJANGO_SETTINGS_MODULE=config.settings pylint --load-plugins pylint_django
+REDIS_URL=redis-stack-url
+OPENAI_API_KEY=your-openai-api-key
 ```
 
 ### 라이브러리 설정하기
