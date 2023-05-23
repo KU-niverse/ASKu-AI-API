@@ -1,54 +1,58 @@
+import os
+from dotenv import load_dotenv
+
 import openai
 from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.schema import Document
 
 vectorstores = ["Redis"]
-VDBurls = {"Redis": "redis://localhost:6379"}
+load_dotenv()
 
-def createVectorstoreIndex(database: str, docs: list, index_name: str) -> None:
+def createVectorstoreIndex(database: str, texts: list[str], index_name: str) -> None:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
     
     if database == "Redis":
-        Redis.from_documents(
-            documents=docs,
+        Redis.from_texts(
+            texts=['abcd','efgh'],
             embedding=OpenAIEmbeddings(),
-            redis_url=VDBurls[database],
-            index_name=index_name
+            index_name=index_name,
+            redis_url=os.getenv("REDIS_URL")
             )
         
-    return
+    return None
 
-def deleteVectorstoreIndex(database: str, index_name: str) -> None:
+def dropVectorstoreIndex(database: str, index_name: str) -> None:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
     
-    if database == "Reids":
+    if database == "Redis":
         result = Redis.drop_index(
             index_name=index_name,
             delete_documents=False,
-            redis_url=VDBurls[database]
+            redis_url=os.getenv("REDIS_URL")
         )
     
     if not result:
-        raise Exception("Drop does not executed")
+        raise Exception("The index does not exist in the Vector Database.")
     
-    return
+    return None
 
-def getVectorStore(database: str, index_name: str = "ku_rules") -> Redis:
+def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
     
     if database == "Redis":
         VectorStore = Redis.from_existing_index(
             embedding=OpenAIEmbeddings(),
-            redis_url=VDBurls[database],
+            redis_url=os.getenv("REDIS_URL"),
             index_name=index_name)
     
     return VectorStore
 
 def getRelatedDocs(content: str, database="Redis"):
-    VectorStore = getVectorStore(database=database, index_name='ku_rules')
+    VectorStore = getVectorStore(database=database, index_name='ku_rule')
     
     RelatedDocs = []
     for documents in VectorStore.similarity_search(query=content):
