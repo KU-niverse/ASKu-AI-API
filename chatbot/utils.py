@@ -9,19 +9,19 @@ from langchain.schema import Document
 vectorstores = ["Redis"]
 load_dotenv()
 
-def createVectorstoreIndex(database: str, texts: list[str], index_name: str) -> None:
+
+def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
-    
     if database == "Redis":
         Redis.from_texts(
             texts=texts,
             embedding=OpenAIEmbeddings(),
             index_name=index_name,
             redis_url=os.getenv("REDIS_URL")
-            )
-        
+        )
     return None
+
 
 def dropVectorstoreIndex(database: str, index_name: str) -> None:
     if database not in vectorstores:
@@ -39,6 +39,7 @@ def dropVectorstoreIndex(database: str, index_name: str) -> None:
     
     return None
 
+
 def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
@@ -51,6 +52,7 @@ def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
     
     return VectorStore
 
+
 def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name='ku_rule')
     
@@ -59,7 +61,8 @@ def getRelatedDocs(content: str, database="Redis"):
         RelatedDocs.append({"role": "user", "content": documents.page_content})
     
     return RelatedDocs
-    
+
+
 def getCompletion(query: str, relatedDocs):
     messages = relatedDocs[:]
     messages.append({"role": "user", "content": query})
