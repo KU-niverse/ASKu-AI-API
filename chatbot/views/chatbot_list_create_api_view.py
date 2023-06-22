@@ -6,7 +6,6 @@ from drf_yasg.utils import swagger_auto_schema
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils import getRelatedDocs, getCompletion
 
 class ChatbotListCreateAPIView(ListCreateAPIView):
     serializer_class = ChatbotQnaSerializer
@@ -22,16 +21,9 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
         serializer.save()
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         # Encoding 문제: 한국어 쿼리를 못 받음
-        serializer = ChatbotQnaSerializer(data=request.data) 
-      
-        user_question = request.data['text']
-        Completion = getCompletion(user_question, getRelatedDocs(user_question, database="Redis"))
-        print(Completion)
-        assistant_content = Completion[-1]['content']['choices'][0]['message']['content']
-        print("checkpoint1")
-        
+        serializer = ChatbotQnaSerializer(data=request.data)
+
         if serializer.is_valid():
             question = serializer.save()
             serializer = ChatbotQnaSerializer(question)
