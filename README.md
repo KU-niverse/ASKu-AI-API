@@ -7,10 +7,21 @@
 SECRET_KEY=your-secret-key
 DEBUG=True
 DJANGO_SETTINGS_MODULE=config.settings pylint --load-plugins pylint_django
+USE_DOCKER=True
+MYSQL_NAME=mysql-name
+MYSQL_USER=mysql-user
+MYSQL_PASSWORD=mysql-password
+MYSQL_HOST=mysql-host-address
+MYSQL_PORT=3306
+REDIS_URL=redis://localhost:6379
+REDIS_REQUIREPASS=redis-requirepass
+OPENAI_API_KEY=your-openai-api-key
 ```
 
 ### 라이브러리 설정하기
 ```shell
+# 만약 안되면 아래를 넣어보시길
+> Set-ExecutionPolicy Unrestricted -Scope Process
 # 가상환경 만들기
 > python -m venv venv
 # 가상환경 활성화
