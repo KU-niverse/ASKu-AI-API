@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from chatbot.models import Chatbot
+from chatbot.utils import getRelatedDocs, getCompletion
 
 class ChatbotQnaSerializer(serializers.Serializer):
     """Serializer definition for Chatbot QnA API."""
 
-    text = serializers.CharField(required=True)
+    content = serializers.CharField(required=True)
+    reference = serializers.CharField(required=False)
 
     class Meta:
         """Meta definition for ChatbotQnaSerializer."""
@@ -12,21 +14,12 @@ class ChatbotQnaSerializer(serializers.Serializer):
         model = Chatbot
         fields = [
             "id",
-            "user",
-            "text",
-            "data",
+            "session_id",
+            "content",
+            "type",
+            "reference",
             "created_at",
         ]
-    #
-    #     read_only_fields = [
-    #         # "id",
-    #         # "created_at",
-    #         # "updated_at",
-    #     ]
-
-    extra_kwargs = {
-        "text": {"required": True},
-    }
 
     def create(self, validated_data):
         return Chatbot.objects.create(**validated_data)
