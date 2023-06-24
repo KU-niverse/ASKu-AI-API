@@ -55,16 +55,18 @@ def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
 
 def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name='ku_rule')
-    
     RelatedDocs = []
+
     for documents in VectorStore.similarity_search(query=content):
-        RelatedDocs.append({"role": "user", "content": documents.page_content})
-    
+        RelatedDocs.append(documents.page_content)
     return RelatedDocs
 
 
 def getCompletion(query: str, relatedDocs):
-    messages = relatedDocs[:]
+    docs = []
+    for i in relatedDocs:
+        docs.append({"role": "user", "content": i})
+    messages = docs[:]
     messages.append({"role": "user", "content": query})
     
     assistant_content = openai.ChatCompletion.create(
