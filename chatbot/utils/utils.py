@@ -6,9 +6,10 @@ from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
 
+from chatbot.utils.roBERTa_Embedding import roBERTa_Embedding
+
 vectorstores = ["Redis"]
 load_dotenv()
-
 
 def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
     if database not in vectorstores:
@@ -16,7 +17,7 @@ def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
     if database == "Redis":
         Redis.from_texts(
             texts=texts,
-            embedding=OpenAIEmbeddings(),
+            embedding=roBERTa_Embedding(),
             index_name=index_name,
             redis_url=os.getenv("REDIS_URL")
         )
@@ -40,13 +41,13 @@ def dropVectorstoreIndex(database: str, index_name: str) -> None:
     return None
 
 
-def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
+def getVectorStore(database: str, index_name: str = "KU_RULE_05") -> Redis:
     if database not in vectorstores:
         raise ValueError(f"{database} does not exist in vectorstores list in utils.py")
     
     if database == "Redis":
         VectorStore = Redis.from_existing_index(
-            embedding=OpenAIEmbeddings(),
+            embedding=roBERTa_Embedding(),
             redis_url=os.getenv("REDIS_URL"),
             index_name=index_name)
     
@@ -54,7 +55,7 @@ def getVectorStore(database: str, index_name: str = "ku_rule") -> Redis:
 
 
 def getRelatedDocs(content: str, database="Redis"):
-    VectorStore = getVectorStore(database=database, index_name='ku_rule')
+    VectorStore = getVectorStore(database=database, index_name='KU_RULE_05')
     RelatedDocs = []
 
     for documents in VectorStore.similarity_search(query=content):

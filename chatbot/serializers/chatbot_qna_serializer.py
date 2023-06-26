@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from chatbot.models import Chatbot
-from chatbot.utils import getRelatedDocs, getCompletion
+from chatbot.utils.utils import getRelatedDocs, getCompletion
 
 class ChatbotQnaSerializer(serializers.Serializer):
     """Serializer definition for Chatbot QnA API."""
