@@ -2,11 +2,11 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from drf_yasg.utils import swagger_auto_schema
-
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
 from chatbot.utils.utils import getRelatedDocs, getCompletion
+from chatbot.utils.db_query import insert_ai_history
+
 
 class ChatbotListCreateAPIView(ListCreateAPIView):
     serializer_class = ChatbotQnaSerializer
@@ -24,6 +24,7 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = ChatbotQnaSerializer(data=request.data)
 
+        session_id = request.data['session_id']
         user_question = request.data['content']
         raw_data = getRelatedDocs(user_question, database="Redis")
         completion = getCompletion(user_question, raw_data)
@@ -31,8 +32,9 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
         assistant_content = completion[-1]['content']['choices'][0]['message']['content']
         reference = '\n\n'.join(raw_data)
         if serializer.is_valid():
-            Chatbot.objects.create(content=user_question)
+            insert_ai_history(session_id=session_id, content=user_question)
             chat_answer = serializer.save(
+                session_id=session_id,
                 content=assistant_content,
                 type=True,
                 reference=reference
@@ -40,4 +42,3 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
             serializer = ChatbotQnaSerializer(chat_answer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
