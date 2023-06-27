@@ -29,7 +29,7 @@ env.read_env(env_file, encoding='utf-8')
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(env("DEBUG"))
+DEBUG = bool(env("IS_DEVELOP"))
 
 ALLOWED_HOSTS = ['*']
 
@@ -47,9 +47,11 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'chatbot',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,6 +60,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = bool(env("IS_DEVELOP"))
 
 ROOT_URLCONF = 'config.urls'
 
