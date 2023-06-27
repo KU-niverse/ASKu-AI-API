@@ -5,16 +5,25 @@
 ### 프로젝트 폴더 바로 아래에 .env 파일을 만들고 아래 내용을 넣어주세요.
 ```
 SECRET_KEY=your-secret-key
-DEBUG=True
+IS_DEVELOP=True
 DJANGO_SETTINGS_MODULE=config.settings pylint --load-plugins pylint_django
+
+# DOCKERIZE SETTINGS
+PORT=0000
 USE_DOCKER=True
+
+# MYSQL SETTINGS
 MYSQL_NAME=mysql-name
 MYSQL_USER=mysql-user
 MYSQL_PASSWORD=mysql-password
 MYSQL_HOST=mysql-host-address
 MYSQL_PORT=3306
+
+# REDIS SETTINGS
 REDIS_URL=redis://localhost:6379
 REDIS_REQUIREPASS=redis-requirepass
+
+# OPENAI SETTINGS
 OPENAI_API_KEY=your-openai-api-key
 ```
 

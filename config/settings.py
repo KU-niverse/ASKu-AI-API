@@ -29,7 +29,7 @@ env.read_env(env_file, encoding='utf-8')
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(env("DEBUG"))
+DEBUG = bool(env("IS_DEVELOP"))
 
 ALLOWED_HOSTS = ['*']
 
@@ -61,8 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-#배포시에 설정 변경해야함 to 지현!!!!!!!!!!
-CORS_ORIGIN_ALLOW_ALL = True 
+CORS_ORIGIN_ALLOW_ALL = bool(env("IS_DEVELOP"))
 
 ROOT_URLCONF = 'config.urls'
 
