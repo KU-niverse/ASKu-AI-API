@@ -23,23 +23,23 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = ChatbotQnaSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = request.data['user_id']
         session_id = select_user_id(user_id)
         user_question = request.data['content']
+        insert_ai_history(session_id=session_id, content=user_question)
+
         raw_data = getRelatedDocs(user_question, database="Redis")
         completion = getCompletion(user_question, raw_data)
-
         assistant_content = completion[-1]['content']['choices'][0]['message']['content']
         reference = '\n\n'.join(raw_data)
-        if serializer.is_valid():
-            insert_ai_history(session_id=session_id, content=user_question)
-            chat_answer = serializer.save(
-                session_id=session_id,
-                content=assistant_content,
-                type=True,
-                reference=reference
-            )
-            serializer = ChatbotQnaSerializer(chat_answer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        chat_answer = serializer.save(
+            session_id=session_id,
+            content=assistant_content,
+            type=True,
+            reference=reference
+        )
+        serializer = ChatbotQnaSerializer(chat_answer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
