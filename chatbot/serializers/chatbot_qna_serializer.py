@@ -1,17 +1,18 @@
 from rest_framework import serializers
-from chatbot.models import Chatbot
-from chatbot.utils.utils import getRelatedDocs, getCompletion
+from django.db import connection
+from datetime import datetime
 
 class ChatbotQnaSerializer(serializers.Serializer):
     """Serializer definition for Chatbot QnA API."""
 
+    user_id = serializers.IntegerField(required=True)
     content = serializers.CharField(required=True)
     reference = serializers.CharField(required=False)
+    session_id = serializers.IntegerField(required=False)
 
     class Meta:
         """Meta definition for ChatbotQnaSerializer."""
 
-        model = Chatbot
         fields = [
             "id",
             "session_id",
@@ -22,4 +23,22 @@ class ChatbotQnaSerializer(serializers.Serializer):
         ]
 
     def create(self, validated_data):
-        return Chatbot.objects.create(**validated_data)
+        session_id = validated_data['session_id']
+        created_at = datetime.now()
+        content = validated_data['content']
+        reference = validated_data['reference']
+        print(session_id)
+        with connection.cursor() as cursor:
+            sql = """
+                INSERT INTO ai_history (session_id, content, type, reference, created_at)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            values = [
+                session_id,
+                content,
+                True,
+                reference,
+                created_at,
+            ]
+            cursor.execute(sql, values)
+        return validated_data
