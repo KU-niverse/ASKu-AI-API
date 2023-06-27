@@ -9,8 +9,8 @@ from langchain.schema import Document
 from chatbot.utils.roBERTa_Embedding import roBERTa_Embedding
 
 vectorstores = ["Redis"]
-embedding = OpenAIEmbeddings  # OpenAIEmbeddings, roBERTa_Embedding
-index_name = 'ku_rule'  # 'ku_rule', 'KU_RULE_05'
+embedding = roBERTa_Embedding  # OpenAIEmbeddings, roBERTa_Embedding
+index_name = 'KU_RULE_05'  # 'ku_rule', 'KU_RULE_05'
 load_dotenv()
 
 def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
