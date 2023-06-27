@@ -16,3 +16,15 @@ def insert_ai_history(session_id, content):
             created_at,
         ]
         cursor.execute(sql, values)
+
+
+def select_user_id(user_id):
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id FROM ai_session WHERE user_id = %s
+        """
+        cursor.execute(sql, [user_id])
+        session_id = cursor.fetchall()
+    if session_id:
+        return session_id[0][0]
+    return None

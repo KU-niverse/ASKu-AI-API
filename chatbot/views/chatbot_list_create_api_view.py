@@ -5,7 +5,7 @@ from rest_framework import status
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
 from chatbot.utils.utils import getRelatedDocs, getCompletion
-from chatbot.utils.db_query import insert_ai_history
+from chatbot.utils.db_query import insert_ai_history, select_user_id
 
 
 class ChatbotListCreateAPIView(ListCreateAPIView):
@@ -24,7 +24,8 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = ChatbotQnaSerializer(data=request.data)
 
-        session_id = request.data['session_id']
+        user_id = request.data['user_id']
+        session_id = select_user_id(user_id)
         user_question = request.data['content']
         raw_data = getRelatedDocs(user_question, database="Redis")
         completion = getCompletion(user_question, raw_data)

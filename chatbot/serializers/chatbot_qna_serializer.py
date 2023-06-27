@@ -5,9 +5,10 @@ from datetime import datetime
 class ChatbotQnaSerializer(serializers.Serializer):
     """Serializer definition for Chatbot QnA API."""
 
-    session_id = serializers.IntegerField(required=True)
+    user_id = serializers.IntegerField(required=True)
     content = serializers.CharField(required=True)
     reference = serializers.CharField(required=False)
+    session_id = serializers.IntegerField(required=False)
 
     class Meta:
         """Meta definition for ChatbotQnaSerializer."""
