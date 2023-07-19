@@ -59,10 +59,18 @@ def getVectorStore(database: str, index_name: str = "KU_RULE_05") -> Redis:
 def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name=index_name)
     RelatedDocs = []
-
-    for documents in VectorStore.similarity_search(query=content):
-        RelatedDocs.append(documents.page_content)
-    return RelatedDocs
+    scores = []
+    
+    docs = VectorStore.similarity_search_with_score(query=content)
+    
+    for (docu, score) in docs:
+        RelatedDocs.append(docu.page_content)
+        scores.append(score)
+        
+    scores.sort()
+    median = scores[len(scores)//2]
+    
+    return RelatedDocs, median
 
 
 def getCompletion(query: str, relatedDocs):
