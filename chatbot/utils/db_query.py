@@ -28,3 +28,33 @@ def select_user_id(user_id):
     if session_id:
         return session_id[0][0]
     return None
+
+
+def is_feedback(qna_id):
+    """ feedback Table에 qna_id의 값이 존재 여부를 확인하는 함수
+    qna_id가 이미 존재할 경우 True, 존재하지 않을 경우 False를 반환
+    """
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id FROM feedback WHERE qna_id = %s
+        """
+        cursor.execute(sql, [qna_id])
+        feedback = cursor.fetchall()
+    if feedback:
+        return True
+    return False
+
+
+def is_not_qna_id(qna_id):
+    """ ai_history Table에 qna_id의 FK값이 존재 여부를 확인하는 함수
+    id가 존재하지 않을 경우 True, 존재할 경우 False를 반환
+    """
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id FROM ai_history WHERE id = %s
+        """
+        cursor.execute(sql, [qna_id])
+        qna = cursor.fetchall()
+    if qna:
+        return False
+    return True
