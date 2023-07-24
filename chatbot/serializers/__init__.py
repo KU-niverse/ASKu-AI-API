@@ -1,1 +1,2 @@
 from .chatbot_qna_serializer import ChatbotQnaSerializer
+from .feedback_serializer import FeedbackSerializer

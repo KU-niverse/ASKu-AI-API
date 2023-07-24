@@ -28,8 +28,7 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
 
         user_id = request.data['user_id']
         session_id = select_user_id(user_id)
-        user_question = request.data['content']
-        insert_ai_history(session_id=session_id, content=user_question)
+        user_question = request.data['q_content']
 
         raw_data = getRelatedDocs(user_question, database="Redis")
         completion = getCompletion(user_question, raw_data)
@@ -37,8 +36,8 @@ class ChatbotListCreateAPIView(ListCreateAPIView):
         reference = '\n\n'.join(raw_data)
         chat_answer = serializer.save(
             session_id=session_id,
-            content=assistant_content,
-            type=True,
+            q_content=user_question,
+            a_content=assistant_content,
             reference=reference
         )
         serializer = ChatbotQnaSerializer(chat_answer)
