@@ -6,11 +6,11 @@ from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
 
-from chatbot.utils.roBERTa_Embedding import roBERTa_Embedding
+# from chatbot.utils.roBERTa_Embedding import roBERTa_Embedding
 
 vectorstores = ["Redis"]
-embedding = roBERTa_Embedding  # OpenAIEmbeddings, roBERTa_Embedding
-index_name = 'ku_rule_index'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index'
+embedding = OpenAIEmbeddings  # OpenAIEmbeddings, roBERTa_Embedding
+index_name = 'ku_rule'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index'
 load_dotenv()
 
 def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
