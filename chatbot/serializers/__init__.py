@@ -1,3 +1,4 @@
+from .chatbot_abstract_serializer import ChatbotAbstractSerializer
 from .chatbot_qna_serializer import ChatbotQnaSerializer
 from .feedback_serializer import FeedbackSerializer
 from .feedback_comment_serializer import FeedbackCommentSerializer

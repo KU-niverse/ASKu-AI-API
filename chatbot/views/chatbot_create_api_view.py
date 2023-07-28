@@ -8,7 +8,7 @@ from chatbot.utils.utils import getRelatedDocs, getCompletion
 from chatbot.utils.db_query import insert_ai_history, select_user_id
 
 
-class ChatbotListCreateAPIView(ListCreateAPIView):
+class ChatbotCreateAPIView(ListCreateAPIView):
     serializer_class = ChatbotQnaSerializer
     queryset = Chatbot.objects.all()
 

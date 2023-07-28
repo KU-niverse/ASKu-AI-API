@@ -1,23 +1,19 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
 
-from chatbot.views import ChatbotListCreateAPIView, FeedbackCreateAPIView, FeedbackCommentCreateAPIView, \
-    ChatbotUpdateAPIView
+from chatbot.views import ChatbotCreateAPIView, ChatbotListUpdateAPIView, \
+    FeedbackCreateAPIView, FeedbackCommentCreateAPIView
 
 app_name = "chatbot"
-
-# router = DefaultRouter()
-# router.register("", ChatbotQnaApi, basename="Chatbot")
 
 urlpatterns = [
     path(
         "",
-        ChatbotListCreateAPIView.as_view(),
+        ChatbotCreateAPIView.as_view(),
         name="Chatbot",
     ),
     path(
         "<int:user_id>",
-        ChatbotUpdateAPIView.as_view(),
+        ChatbotListUpdateAPIView.as_view(),
         name="Chatbot",
     ),
     path(
