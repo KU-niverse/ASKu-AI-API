@@ -30,6 +30,18 @@ def select_user_id(user_id):
     return None
 
 
+def update_is_delete(session_id):
+    with connection.cursor() as cursor:
+        sql = """
+            UPDATE ai_history SET is_deleted = 1 WHERE session_id = %s
+        """
+        cursor.execute(sql, [session_id])
+        history = cursor.rowcount
+    if history:
+        return True
+    return False
+
+
 def is_feedback(qna_id):
     """ feedback Table에 qna_id의 값이 존재 여부를 확인하는 함수
     qna_id가 이미 존재할 경우 True, 존재하지 않을 경우 False를 반환
