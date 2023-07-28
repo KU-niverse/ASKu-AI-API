@@ -30,6 +30,18 @@ def select_user_id(user_id):
     return None
 
 
+def select_ai_history(session_id):
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id, q_content, a_content, reference, created_at FROM ai_history WHERE session_id = %s
+        """
+        cursor.execute(sql, [session_id])
+        chatbot_list = cursor.fetchall()
+    if chatbot_list:
+        return chatbot_list
+    return None
+
+
 def update_is_delete(session_id):
     with connection.cursor() as cursor:
         sql = """
