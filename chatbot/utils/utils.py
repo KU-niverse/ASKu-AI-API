@@ -9,8 +9,8 @@ from langchain.schema import Document
 from chatbot.utils.roBERTa_Embedding import roBERTa_Embedding
 
 vectorstores = ["Redis"]
-embedding = roBERTa_Embedding  # OpenAIEmbeddings, roBERTa_Embedding
-index_name = 'ku_rule_index'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index'
+embedding = OpenAIEmbeddings  # OpenAIEmbeddings, roBERTa_Embedding
+index_name = 'ku_rule'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index'
 load_dotenv()
 
 def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
@@ -60,8 +60,9 @@ def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name=index_name)
     RelatedDocs = []
 
-    for documents in VectorStore.similarity_search(query=content):
-        RelatedDocs.append(documents.page_content)
+    for index, documents in enumerate(VectorStore.similarity_search(query=content)):
+        # RelatedDocs.append(documents.page_content)
+        RelatedDocs.append("{}: {}".format(index+1, documents.page_content))
     return RelatedDocs
 
 
