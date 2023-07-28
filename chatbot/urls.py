@@ -1,7 +1,8 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from chatbot.views import ChatbotListCreateAPIView, FeedbackCreateAPIView, FeedbackCommentCreateAPIView
+from chatbot.views import ChatbotListCreateAPIView, FeedbackCreateAPIView, FeedbackCommentCreateAPIView, \
+    ChatbotUpdateAPIView
 
 app_name = "chatbot"
 
@@ -12,6 +13,11 @@ urlpatterns = [
     path(
         "",
         ChatbotListCreateAPIView.as_view(),
+        name="Chatbot",
+    ),
+    path(
+        "<int:user_id>",
+        ChatbotUpdateAPIView.as_view(),
         name="Chatbot",
     ),
     path(
