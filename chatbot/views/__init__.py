@@ -1,4 +1,4 @@
 from .chatbot_list_create_api_view import ChatbotListCreateAPIView
-from .chatbot_update_api_view import ChatbotUpdateAPIView
+from .chatbot_list_update_api_view import ChatbotListUpdateAPIView
 from .feedback_create_api_view import FeedbackCreateAPIView
 from .feedback_comment_create_api_view import FeedbackCommentCreateAPIView
