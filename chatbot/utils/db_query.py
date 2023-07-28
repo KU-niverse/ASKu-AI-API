@@ -58,3 +58,33 @@ def is_not_qna_id(qna_id):
     if qna:
         return False
     return True
+
+
+def is_not_feedback_id(feedback_id):
+    """ feedback Table에 feedback_id의 FK값이 존재 여부를 확인하는 함수
+    id가 존재하지 않을 경우 True, 존재할 경우 False를 반환
+    """
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id FROM feedback WHERE id = %s
+        """
+        cursor.execute(sql, [feedback_id])
+        feedback = cursor.fetchall()
+    if feedback:
+        return False
+    return True
+
+
+def is_feedback_content(feedback_id):
+    """ feedback_content Table에 feedback_id의 값이 존재 여부를 확인하는 함수
+    feedback_id가 이미 존재할 경우 True, 존재하지 않을 경우 False를 반환
+    """
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id FROM feedback_content WHERE feedback_id = %s
+        """
+        cursor.execute(sql, [feedback_id])
+        comment = cursor.fetchall()
+    if comment:
+        return True
+    return False
