@@ -1,2 +1,3 @@
 from .chatbot_list_create_api_view import ChatbotListCreateAPIView
 from .feedback_create_api_view import FeedbackCreateAPIView
+from .feedback_comment_create_api_view import FeedbackCommentCreateAPIView
