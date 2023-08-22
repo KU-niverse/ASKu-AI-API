@@ -36,6 +36,11 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 urlpatterns = [
+    path(
+        "",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
     path("admin/", admin.site.urls),
     path("chatbot/", include("chatbot.urls")),
     re_path(

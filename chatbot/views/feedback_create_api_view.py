@@ -13,7 +13,6 @@ class FeedbackCreateAPIView(CreateAPIView):
     serializer_class = FeedbackSerializer
 
     def post(self, request, *args, **kwargs):
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         qna_id = request.data['qna_id']

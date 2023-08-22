@@ -33,7 +33,8 @@ def select_user_id(user_id):
 def select_ai_history(session_id):
     with connection.cursor() as cursor:
         sql = """
-            SELECT id, q_content, a_content, reference, created_at FROM ai_history WHERE session_id = %s
+            SELECT id, q_content, a_content, reference, created_at FROM ai_history 
+            WHERE session_id = %s AND is_deleted = 0
         """
         cursor.execute(sql, [session_id])
         chatbot_list = cursor.fetchall()
