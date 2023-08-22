@@ -30,7 +30,6 @@ class ChatbotQnaSerializer(serializers.Serializer):
         q_content = validated_data['q_content']
         a_content = validated_data['a_content']
         reference = validated_data['reference']
-        print(session_id)
         with connection.cursor() as cursor:
             sql = """
                 INSERT INTO ai_history (session_id, q_content, a_content, reference, created_at)
