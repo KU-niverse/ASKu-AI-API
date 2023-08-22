@@ -15,6 +15,9 @@ class ChatbotListUpdateAPIView(APIView):
         if session_id is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         history = select_ai_history(session_id)
+        if history is None:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
         serialized_data = []
         for tuple_data in history:
             serializer = ChatbotAbstractSerializer(
