@@ -17,7 +17,6 @@ def insert_ai_history(session_id, content):
         ]
         cursor.execute(sql, values)
 
-
 def select_user_id(user_id):
     with connection.cursor() as cursor:
         sql = """
@@ -29,6 +28,38 @@ def select_user_id(user_id):
         return session_id[0][0]
     return None
 
+def check_ai_session(user_id):
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id, is_questioning FROM ai_session WHERE user_id = %s
+        """
+        cursor.execute(sql, [user_id])
+        session_info = cursor.fetchall()
+    if session_info:
+        return session_info[0]
+    return None
+#ai_session을 시작할때 실행
+def ai_session_start(session_id, q_content):
+    with connection.cursor() as cursor:
+        sql = """
+            UPDATE ai_session SET is_questioning = 1, processing_q = %s WHERE id = %s
+        """
+        cursor.execute(sql, [q_content, session_id])
+        session_info = cursor.rowcount
+    if session_info:
+        return True
+    return False
+
+def ai_session_end(session_id):
+    with connection.cursor() as cursor:
+        sql = """
+            UPDATE ai_session SET is_questioning = 0, processing_q = NULL WHERE id = %s
+        """
+        cursor.execute(sql, [session_id])
+        session_info = cursor.rowcount
+    if session_info:
+        return True
+    return False
 
 def select_ai_history(session_id):
     with connection.cursor() as cursor:

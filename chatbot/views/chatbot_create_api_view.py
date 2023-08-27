@@ -5,7 +5,7 @@ from rest_framework import status
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
 from chatbot.utils.utils import getRelatedDocs, getCompletion
-from chatbot.utils.db_query import insert_ai_history, select_user_id
+from chatbot.utils.db_query import insert_ai_history, check_ai_session, ai_session_start, ai_session_end
 
 
 class ChatbotCreateAPIView(ListCreateAPIView):
@@ -27,8 +27,18 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = request.data['user_id']
-        session_id = select_user_id(user_id)
+        session_info = check_ai_session(user_id)
+        session_id = session_info[0]
+        is_questioning = session_info[1]
         user_question = request.data['q_content']
+        #현재 진행중인지 확인-is_questioning
+        if (is_questioning == 1):
+            #TODO: response 형식 수정
+            #현재 진행중인 질문과 함께 reject
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+        #TODO: false일때 DB에러 처리 해야함
+        #현재 진행중이 아니라면 진행중으로 변경
+        ai_session_start(session_id, user_question)
 
         raw_data = getRelatedDocs(user_question, database="Redis")
         completion = getCompletion(user_question, raw_data)
@@ -41,4 +51,6 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             reference=reference
         )
         serializer = ChatbotQnaSerializer(chat_answer)
+        #TODO: false일때 DB에러 처리 해야함
+        ai_session_end(session_id)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
