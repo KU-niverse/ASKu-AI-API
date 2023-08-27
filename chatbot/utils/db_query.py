@@ -31,14 +31,14 @@ def select_user_id(user_id):
 def check_ai_session(user_id):
     with connection.cursor() as cursor:
         sql = """
-            SELECT id, is_questioning FROM ai_session WHERE user_id = %s
+            SELECT id, is_questioning, processing_q FROM ai_session WHERE user_id = %s
         """
         cursor.execute(sql, [user_id])
         session_info = cursor.fetchall()
     if session_info:
         return session_info[0]
     return None
-#ai_session을 시작할때 실행
+#ai_session을 시작할때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환
 def ai_session_start(session_id, q_content):
     with connection.cursor() as cursor:
         sql = """
@@ -49,7 +49,7 @@ def ai_session_start(session_id, q_content):
     if session_info:
         return True
     return False
-
+#ai_session을 끝낼 때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환
 def ai_session_end(session_id):
     with connection.cursor() as cursor:
         sql = """
