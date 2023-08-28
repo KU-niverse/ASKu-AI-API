@@ -74,6 +74,18 @@ def select_ai_history(session_id):
     return None
 
 
+def get_ai_session(user_id):
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT is_questioning, processing_q FROM ai_session WHERE user_id = %s
+        """
+        cursor.execute(sql, [user_id])
+        session = cursor.fetchall()
+    if session:
+        return session
+    return None
+
+
 def update_is_delete(session_id):
     with connection.cursor() as cursor:
         sql = """
