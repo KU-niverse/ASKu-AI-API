@@ -17,6 +17,7 @@ def insert_ai_history(session_id, content):
         ]
         cursor.execute(sql, values)
 
+
 def select_user_id(user_id):
     with connection.cursor() as cursor:
         sql = """
@@ -28,6 +29,7 @@ def select_user_id(user_id):
         return session_id[0][0]
     return None
 
+
 def check_ai_session(user_id):
     with connection.cursor() as cursor:
         sql = """
@@ -38,8 +40,10 @@ def check_ai_session(user_id):
     if session_info:
         return session_info[0]
     return None
-#ai_session을 시작할때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환
+
+
 def ai_session_start(session_id, q_content):
+    """ ai_session을 시작할때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환 """
     with connection.cursor() as cursor:
         sql = """
             UPDATE ai_session SET is_questioning = 1, processing_q = %s WHERE id = %s
@@ -49,8 +53,10 @@ def ai_session_start(session_id, q_content):
     if session_info:
         return True
     return False
-#ai_session을 끝낼 때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환
+
+
 def ai_session_end(session_id):
+    """ ai_session을 끝낼 때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환 """
     with connection.cursor() as cursor:
         sql = """
             UPDATE ai_session SET is_questioning = 0, processing_q = NULL WHERE id = %s
@@ -60,6 +66,7 @@ def ai_session_end(session_id):
     if session_info:
         return True
     return False
+
 
 def select_ai_history(session_id):
     with connection.cursor() as cursor:
