@@ -69,8 +69,4 @@ class ChatbotCreateAPIView(ListCreateAPIView):
         end_result = ai_session_end(session_id)
         if not end_result:
             raise DatabaseError
-        return Response({
-            "success": True,
-            "data": serializer.data,
-            "message": "성공적으로 질문 답변이 이루어졌습니다!"
-        }, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
