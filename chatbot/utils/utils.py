@@ -9,7 +9,7 @@ from langchain.schema import Document
 
 vectorstore = ["Redis"]
 embedding = OpenAIEmbeddings  # OpenAIEmbeddings, roBERTa_Embedding
-index_name = 'ku_rule_index_23+'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index'
+index_name = 'ku_rule_index_all_ver1'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index_23+'
 load_dotenv()
 
 
