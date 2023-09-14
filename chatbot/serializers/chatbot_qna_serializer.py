@@ -6,6 +6,7 @@ from datetime import datetime
 class ChatbotQnaSerializer(serializers.Serializer):
     """Serializer definition for Chatbot QnA API."""
 
+    id = serializers.IntegerField(read_only=True)
     user_id = serializers.IntegerField(required=True)
     q_content = serializers.CharField(required=True)
     a_content = serializers.CharField(required=False)
@@ -43,4 +44,14 @@ class ChatbotQnaSerializer(serializers.Serializer):
                 created_at,
             ]
             cursor.execute(sql, values)
+        with connection.cursor() as cursor:
+            sql = "SELECT id FROM ai_history WHERE session_id = %s AND q_content = %s AND a_content = %s"
+            values = [
+                session_id,
+                q_content,
+                a_content,
+            ]
+            cursor.execute(sql, values)
+            chatbot_id = cursor.fetchall()[0][0]
+        validated_data['id'] = chatbot_id
         return validated_data
