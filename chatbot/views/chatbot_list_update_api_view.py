@@ -34,6 +34,7 @@ class ChatbotListUpdateAPIView(APIView):
 
 
     def patch(self, request, user_id, *args, **kwargs):
+        raise ValueError("This is a forced error for testing purposes.")
         session_id = select_user_id(user_id)
         if session_id is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
