@@ -42,6 +42,22 @@ def check_ai_session(user_id):
     return None
 
 
+def check_question_limit(user_id):
+    """ user가 질문을 할 수 있는지 여부를 판단하는 함수.
+    question_limit의 기본값은 5이며, question_limit가 0보다 클 경우 user가 질문할 수 있음.
+    """
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT question_limit FROM ai_session WHERE user_id = %s
+        """
+        cursor.execute(sql, [user_id])
+        session_info = cursor.fetchall()
+        print(session_info)
+    if session_info[0][0] > 0:
+        return False
+    return True
+
+
 def ai_session_start(session_id, q_content):
     """ ai_session을 시작할때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환 """
     with connection.cursor() as cursor:
@@ -55,12 +71,18 @@ def ai_session_start(session_id, q_content):
     return False
 
 
-def ai_session_end(session_id):
+def ai_session_end(session_id, is_limit):
     """ ai_session을 끝낼 때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환 """
     with connection.cursor() as cursor:
-        sql = """
-            UPDATE ai_session SET is_questioning = 0, processing_q = NULL WHERE id = %s
-        """
+        if is_limit:
+            sql = """
+                UPDATE ai_session SET is_questioning = 0, processing_q = NULL, question_limit = question_limit - 1 
+                WHERE id = %s
+            """
+        else:
+            sql = """
+                UPDATE ai_session SET is_questioning = 0, processing_q = NULL WHERE id = %s
+            """
         cursor.execute(sql, [session_id])
         session_info = cursor.rowcount
     if session_info:

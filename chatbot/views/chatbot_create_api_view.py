@@ -3,11 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
 from chatbot.utils.utils import getRelatedDocs, getCompletion
-from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end
+from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit
 
 
 class DatabaseError(APIException):
@@ -19,6 +18,7 @@ class DatabaseError(APIException):
 class ChatbotCreateAPIView(ListCreateAPIView):
     serializer_class = ChatbotQnaSerializer
     queryset = Chatbot.objects.all()
+    is_limit = False
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -36,10 +36,12 @@ class ChatbotCreateAPIView(ListCreateAPIView):
 
         user_id = request.data['user_id']
         session_info = check_ai_session(user_id)
-        session_id = session_info[0]
-        is_questioning = session_info[1]
-        processing_q = session_info[2]
+        session_id, is_questioning, processing_q = session_info[:3]
         user_question = request.data['q_content']
+
+        if self.is_limit and check_question_limit(user_id):
+            """ user가 1일 질문 횟수(5회)를 넘겼을 경우 오류 반환 """
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         if is_questioning:
             """ 현재 진행중일 경우 오류 반환 """
@@ -66,7 +68,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             reference=reference
         )
         serializer = ChatbotQnaSerializer(chat_answer)
-        end_result = ai_session_end(session_id)
+        end_result = ai_session_end(session_id, self.is_limit)
         if not end_result:
             raise DatabaseError
         return Response(serializer.data, status=status.HTTP_201_CREATED)
