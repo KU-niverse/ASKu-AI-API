@@ -5,7 +5,7 @@ from rest_framework.exceptions import APIException
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils.utils import getRelatedDocs, getCompletion
+from chatbot.utils.utils import getRelatedDocs, getCompletion, getClientIp
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit
 
 
@@ -35,6 +35,10 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = request.data['user_id']
+        #비로그인 유저 처리 로직
+        if user_id == 0:
+            user_ip = getClientIp(request)
+        
         session_info = check_ai_session(user_id)
         session_id, is_questioning, processing_q = session_info[:3]
         user_question = request.data['q_content']
