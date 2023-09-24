@@ -33,7 +33,7 @@ def select_user_id(user_id):
 def check_ai_session(user_id):
     with connection.cursor() as cursor:
         sql = """
-            SELECT id, is_questioning, processing_q, question_limit FROM ai_session WHERE user_id = %s
+            SELECT id,user_id, is_questioning, processing_q, question_limit FROM ai_session WHERE user_id = %s
         """
         cursor.execute(sql, [user_id])
         session_info = cursor.fetchall()
