@@ -5,8 +5,8 @@ from rest_framework.exceptions import APIException
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils.utils import getRelatedDocs, getCompletion
-from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit
+from chatbot.utils.utils import getRelatedDocs, getCompletion, getUserIpAddress
+from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit, check_ai_session_for_ip_address, create_ai_session_for_ip_address
 
 
 class DatabaseError(APIException):
@@ -35,11 +35,23 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = request.data['user_id']
-        session_info = check_ai_session(user_id)
-        session_id, is_questioning, processing_q = session_info[:3]
+        #비로그인 유저일 경우
+        if user_id == 0:
+            user_ip_address = getUserIpAddress(request)
+            #ip주소가 있는지 확인
+            session_info = check_ai_session_for_ip_address(user_ip_address)
+            #ip주소가 없으면 세션을 생성
+            if session_info == None:
+                session_id = create_ai_session_for_ip_address(user_ip_address)
+                session_info = check_ai_session_for_ip_address(user_ip_address)
+        else:
+            session_info = check_ai_session(user_id)
+
+        print(session_info)
+        session_id, user_id, is_questioning, processing_q, question_limit = session_info[:5]
         user_question = request.data['q_content']
 
-        if self.is_limit and check_question_limit(user_id):
+        if question_limit <= 0:
             """ user가 1일 질문 횟수(5회)를 넘겼을 경우 오류 반환 """
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -68,7 +80,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             reference=reference
         )
         serializer = ChatbotQnaSerializer(chat_answer)
-        end_result = ai_session_end(session_id, self.is_limit)
+        end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
         if not end_result:
             raise DatabaseError
         return Response(serializer.data, status=status.HTTP_201_CREATED)

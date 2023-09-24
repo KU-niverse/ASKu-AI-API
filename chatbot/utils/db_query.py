@@ -33,13 +33,32 @@ def select_user_id(user_id):
 def check_ai_session(user_id):
     with connection.cursor() as cursor:
         sql = """
-            SELECT id, is_questioning, processing_q FROM ai_session WHERE user_id = %s
+            SELECT id,user_id, is_questioning, processing_q, question_limit FROM ai_session WHERE user_id = %s
         """
         cursor.execute(sql, [user_id])
         session_info = cursor.fetchall()
     if session_info:
         return session_info[0]
     return None
+
+def check_ai_session_for_ip_address(user_ip_address):
+    with connection.cursor() as cursor:
+        sql = """
+            SELECT id, user_id, is_questioning, processing_q, question_limit FROM ai_session WHERE ip_address = %s
+        """
+        cursor.execute(sql, [user_ip_address])
+        session_info = cursor.fetchall()
+    if session_info:
+        return session_info[0]
+    return None
+def create_ai_session_for_ip_address(user_ip_address):
+    with connection.cursor() as cursor:
+        sql = """
+            INSERT INTO ai_session (user_id, ip_address) VALUES (%s, %s)
+        """
+        cursor.execute(sql, [0, user_ip_address])
+        session_id = cursor.lastrowid
+    return session_id
 
 
 def check_question_limit(user_id):
@@ -71,10 +90,10 @@ def ai_session_start(session_id, q_content):
     return False
 
 
-def ai_session_end(session_id, is_limit):
+def ai_session_end(session_id, is_limit, is_ip_based):
     """ ai_session을 끝낼 때 실행, 실제로 업데이트가 이루어지지 않으면 False를 반환 """
     with connection.cursor() as cursor:
-        if is_limit:
+        if is_limit or is_ip_based:
             sql = """
                 UPDATE ai_session SET is_questioning = 0, processing_q = NULL, question_limit = question_limit - 1 
                 WHERE id = %s
