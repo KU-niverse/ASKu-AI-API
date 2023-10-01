@@ -1,15 +1,16 @@
 import os
-from dotenv import load_dotenv
+from typing import Optional
 
 import openai
+import tiktoken
+from dotenv import load_dotenv
 from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.schema import Document
 
 
 vectorstore = ["Redis"]
 embedding = OpenAIEmbeddings  # OpenAIEmbeddings, roBERTa_Embedding
-index_name = 'ku_rule_index_all_ver1'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index_23+'
+index_name = 'ku_rule_index_all_ver1'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index_23+', 'ku_rule_index_all_ver1'
 load_dotenv()
 
 
@@ -56,12 +57,30 @@ def getVectorStore(database: str, index_name: str = "KU_RULE_05") -> Redis:
     return VectorStore
 
 
+def count_tokens_from_text(
+        text: str,
+        encoding_name: Optional[str] = None) -> int:
+    """Returns the number of tokens in a text string."""
+    if encoding_name is None:
+        encoding_name = "cl100k_base"
+
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(text))
+    return num_tokens
+
+
 def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name=index_name)
     RelatedDocs = []
+    token_limit = 3500
+    token_cnt = 0
 
     for index, documents in enumerate(VectorStore.similarity_search(query=content)):
-        RelatedDocs.append("{}: {}".format(index + 1, documents.page_content))
+        token_cnt += count_tokens_from_text(documents.page_content)
+        if token_cnt > token_limit:
+            break
+        RelatedDocs.append("Doc{}: {}".format(index + 1, documents.page_content))
+    RelatedDocs = '\n\n'.join(RelatedDocs)
     return RelatedDocs
 
 
@@ -71,9 +90,9 @@ def getCompletion(query: str, relatedDocs):
         아래의 ```로 구분된 단락은 주어지는 변수들에 대한 설명입니다.
         ```
         userQuery: 고려대학교 학생들의 질문입니다.
-        Doc1, Doc2, Doc3, Doc4: 답변을 생성하는 데 근거할 수 있는 고려대학교 학칙 문서입니다.
+        Doc: 답변을 생성하는 데 근거할 수 있는 고려대학교 학칙 문서들입니다.
         ```
-        userQuery에 대한 답변을 Doc1, Doc2, Doc3 그리고 Doc4에 근거하여 생성하십시오.
+        userQuery에 대한 답변을 Doc에 근거하여 생성하십시오.
 
         아래의 ```로 구분된 단락은, 답변을 생성할 때 반드시 지켜야 하는 규칙들입니다.
         ```
@@ -93,10 +112,7 @@ def getCompletion(query: str, relatedDocs):
         아래의 ```로 구분된 단락에, 각 변수가 주어집니다.
         ```
         userQuery: {query}
-        Doc1: {relatedDocs[0]}
-        Doc2: {relatedDocs[1]}
-        Doc3: {relatedDocs[2]}
-        Doc4: {relatedDocs[3]}
+        {relatedDocs}
         ```
         """}]
 

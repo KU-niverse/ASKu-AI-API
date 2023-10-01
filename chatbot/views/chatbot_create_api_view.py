@@ -47,7 +47,6 @@ class ChatbotCreateAPIView(ListCreateAPIView):
         else:
             session_info = check_ai_session(user_id)
 
-        print(session_info)
         session_id, user_id, is_questioning, processing_q, question_limit = session_info[:5]
         user_question = request.data['q_content']
 
@@ -69,10 +68,9 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
             raise DatabaseError
 
-        raw_data = getRelatedDocs(user_question, database="Redis")
-        completion = getCompletion(user_question, raw_data)
+        reference = getRelatedDocs(user_question, database="Redis")
+        completion = getCompletion(user_question, reference)
         assistant_content = completion[-1]['content']['choices'][0]['message']['content']
-        reference = '\n\n'.join(raw_data)
         chat_answer = serializer.save(
             session_id=session_id,
             q_content=user_question,
