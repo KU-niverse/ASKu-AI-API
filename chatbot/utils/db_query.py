@@ -71,7 +71,6 @@ def check_question_limit(user_id):
         """
         cursor.execute(sql, [user_id])
         session_info = cursor.fetchall()
-        print(session_info)
     if session_info[0][0] > 0:
         return False
     return True
