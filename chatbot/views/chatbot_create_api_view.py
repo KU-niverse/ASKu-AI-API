@@ -63,22 +63,28 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             }
             return Response(response_data, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        start_result = ai_session_start(session_id, user_question)
-        if not start_result:
-            """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
-            raise DatabaseError
+        try:
+            start_result = ai_session_start(session_id, user_question)
+            if not start_result:
+                """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
+                raise DatabaseError
 
-        reference = getRelatedDocs(user_question, database="Redis")
-        completion = getCompletion(user_question, reference)
-        assistant_content = completion[-1]['content']['choices'][0]['message']['content']
-        chat_answer = serializer.save(
-            session_id=session_id,
-            q_content=user_question,
-            a_content=assistant_content,
-            reference=reference
-        )
-        serializer = ChatbotQnaSerializer(chat_answer)
-        end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
-        if not end_result:
-            raise DatabaseError
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            reference = getRelatedDocs(user_question, database="Redis")
+            completion = getCompletion(user_question, reference)
+            assistant_content = completion[-1]['content']['choices'][0]['message']['content']
+            chat_answer = serializer.save(
+                session_id=session_id,
+                q_content=user_question,
+                a_content=assistant_content,
+                reference=reference
+            )
+            serializer = ChatbotQnaSerializer(chat_answer)
+            end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
+            if not end_result:
+                raise DatabaseError
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except:
+            end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
+            if not end_result:
+                raise DatabaseError
+            return Response(serializer.data, status=status.HTTP_408_REQUEST_TIMEOUT)
