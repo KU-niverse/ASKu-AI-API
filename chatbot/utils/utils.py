@@ -72,10 +72,10 @@ def count_tokens_from_text(
 def getRelatedDocs(content: str, database="Redis"):
     VectorStore = getVectorStore(database=database, index_name=index_name)
     RelatedDocs = []
-    token_limit = 3500
+    token_limit = 3000
     token_cnt = 0
 
-    for index, documents in enumerate(VectorStore.similarity_search(query=content)):
+    for index, documents in enumerate(VectorStore.similarity_search(query=content, k=3)):
         token_cnt += count_tokens_from_text(documents.page_content)
         if token_cnt > token_limit:
             break
