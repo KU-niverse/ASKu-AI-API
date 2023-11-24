@@ -21,6 +21,16 @@ source_id_key = "source_id"
 class RedisVectorstore(Redis):
     """
     Singleton Redis Object.
+    
+    Must be Initialized in ./connfig/settings.py to call singleton object by RedisVectorstore().
+    ```
+        RedisVectorstore(
+            embedding=OpenAIEmbeddings(),
+            index_name="test_index",
+            redis_url=os.getenv("REDIS_URL"),
+        )
+    ```
+    Once create the RedisVectorstore class, the created RedisVectorstore can be called by RedisVectorstore().
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,6 +39,17 @@ class RedisVectorstore(Redis):
 class retriever(MultiVectorRetriever):
     """
     Singleton MultiVectorRetriever Object.
+    
+    Must be Initialized in ./connfig/settings.py to call singleton object by retriever().
+    ```
+        docstore = loadObjectFromPickle(file_path="./docstore_20231125-011508")
+        retriever(
+            vectorstore=RedisVectorstore(),
+            docstore=docstore,
+            id_key=source_id_key
+            )
+    ```
+    Once create the retriever class, the created retriever can be called by retriever().
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,8 +174,6 @@ def transformParentdocsToChilddocs(
     splitter = RecursiveCharacterTextSplitter()
     
     sections = re.split(pattern=index_pat, string=parent_docs.page_content)
-    indexes = sections[1::2] 
-    contents = sections[2::2]
     _sections = [sections[0]]
     for i in range(2, len(sections), 2):
         _sections.append(f"[[{sections[i-1].rstrip()}]] " + sections[i])
@@ -205,3 +224,30 @@ def addDocumentToRedis(
             )
     except Exception as e:
         print(f'An Error Occured: {e}')
+
+# # in settings.py
+# RedisVectorstore(
+#     embedding=OpenAIEmbeddings(),
+#     index_name="test_index",
+#     redis_url=os.getenv("REDIS_URL"),
+# )
+
+# # from utils import RedisVectorstore
+# RedisVectorstore()
+# # Same object id
+
+# # 2개의 docstore만 유지 / 저장 directory 생성
+# docstore = loadObjectFromPickle(file_path="./docstore_20231125-011508")
+# A = retriever(
+#     vectorstore=RedisVectorstore(),
+#     docstore=docstore,
+#     id_key=source_id_key
+#     )
+
+# B = retriever()
+
+# # Disk 저장 => 안 좋은 점?
+# # 배치 처리 전에 저장 => 배치 처리 => 처리 후 삭제
+
+# # 전역변수로 list 선언 = [['목차1', '내용1'], ['목차2', '내용2'], ...] => 모든 문서가 동시에 RAM에 올라감
+# # 문서들을 서버 Disk에 저장한 다음에 처리하고 삭제 가능 => 성능 향상
