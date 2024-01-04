@@ -17,7 +17,7 @@ from singleton import singleton
 
 load_dotenv()
 embedding = OpenAIEmbeddings()
-source_id_key = "id"
+source_id_key = "doc_id"
 
 @singleton
 class RedisVectorstore(Redis):
@@ -69,12 +69,11 @@ class retriever(MultiVectorRetriever):
         """
         sub_docs = self.vectorstore.similarity_search(query, **self.search_kwargs)
         # We do this to maintain the order of the ids that are returned
-        ids = ["afa0e50c-ab28-4c3f-98a5-8d9987918007"]
+        print(sub_docs[0]); input()
+        ids = []
         for d in sub_docs:
             if d.metadata[self.id_key] not in ids:
                 ids.append(d.metadata[self.id_key])
-                # ids.append(d.metadata[self.id_key].split(":")[2])
-                # ids.append(d.metadata[self.id_key])
         print(ids)
         keys = []
         for (idx, key) in enumerate(self.docstore.yield_keys()):
@@ -266,9 +265,14 @@ RedisVectorstore(
     embedding=OpenAIEmbeddings(),
     index_name=index_name,
     redis_url=os.getenv("REDIS_URL"),
+    index_schema={
+        "text":[
+            {'name': 'doc_id'}
+        ]
+    }
 )
 
-# Batch Code
+# # Batch Code
 
 # initRecordManager(index_name=index_name)
 
@@ -286,8 +290,8 @@ RedisVectorstore(
 # Retriever Code
 
 docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
-for key in docstore.yield_keys():
-    print(key); input()
+# for key in docstore.yield_keys():
+#     print(key); input()
 
 mv_retriever = retriever(
     vectorstore=RedisVectorstore(),
