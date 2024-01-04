@@ -1,8 +1,9 @@
 import os, re, time
 import pickle, uuid
-from typing import Literal
+from typing import Literal, List
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
+from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.indexes import SQLRecordManager, index
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -15,7 +16,7 @@ from singleton import singleton
 
 load_dotenv()
 embedding = OpenAIEmbeddings()
-source_id_key = "source_id"
+source_id_key = "id"
 
 @singleton
 class RedisVectorstore(Redis):
@@ -53,6 +54,35 @@ class retriever(MultiVectorRetriever):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+    
+    # Override
+    def _get_relevant_documents(
+        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+    ) -> List[Document]:
+        """Get documents relevant to a query.
+        Args:
+            query: String to find relevant documents for
+            run_manager: The callbacks handler to use
+        Returns:
+            List of relevant documents
+        """
+        sub_docs = self.vectorstore.similarity_search(query, **self.search_kwargs)
+        # We do this to maintain the order of the ids that are returned
+        ids = ["afa0e50c-ab28-4c3f-98a5-8d9987918007"]
+        for d in sub_docs:
+            if d.metadata[self.id_key] not in ids:
+                ids.append(d.metadata[self.id_key])
+                # ids.append(d.metadata[self.id_key].split(":")[2])
+                # ids.append(d.metadata[self.id_key])
+        print(ids)
+        keys = []
+        for (idx, key) in enumerate(self.docstore.yield_keys()):
+            print(idx, '\n', 
+                  "key=", key, '\n', self.docstore.mget(keys=[key]), '\n')
+            keys.append(key)
+        print(keys)
+        docs = self.docstore.mget(ids)
+        return [d for d in docs if d is not None]
 
 
 def saveObjectToPickle(
@@ -83,6 +113,8 @@ def saveObjectToPickle(
         print(f"Directory Not Found: {save_dir}")
     except Exception as e:
         print(f"An Error occured: {e}")
+    
+    return timeSuffix if addTimeSuffix else None
         
 def loadObjectFromPickle(
         file_path: str) -> object:
@@ -140,6 +172,10 @@ def transformWikidocsToParentdocs(
             )
     return parent_docs
 
+def mapSourceIdKey():
+    
+    return
+
 def saveDocstore(
         parent_docs: list[Document], 
         save_dir: str) -> None:
@@ -153,12 +189,15 @@ def saveDocstore(
     docstore = InMemoryStore()
     _id_docs = [(_doc.metadata[source_id_key], _doc) for _doc in parent_docs]
     docstore.mset(_id_docs)
-    saveObjectToPickle(
-        obejct=docstore,
+    timestamp = saveObjectToPickle(
+        object=docstore,
         save_dir=save_dir,
         name="docstore", 
         addTimeSuffix=True)
+    set_key(dotenv_path="./.env", key_to_set="docstoreTimestamp", value_to_set=timestamp)
     
+    return timestamp
+
 def transformParentdocsToChilddocs(
         parent_docs: list[Document]) -> list[Document]:
     """
@@ -181,8 +220,7 @@ def transformParentdocsToChilddocs(
                          for section in _sections]
 
     docs = splitter.split_documents(sections)
-    child_docs = splitter.split_documents(docs)
-
+    child_docs = splitter.split_documents(docs) 
     return child_docs
 
 def initRecordManager(
@@ -196,7 +234,7 @@ def initRecordManager(
     namespace = f"redis/{index_name}"
     recordManager = SQLRecordManager(
         namespace=namespace,
-        db_url=f"sqlite:///recordManager_{index_name}.sql")
+        db_url=f"sqlite:///./data/recordManager_{index_name}.sql")
     recordManager.create_schema()
 
 def addDocumentToRedis(
@@ -210,44 +248,54 @@ def addDocumentToRedis(
     - document : The list of document of the type Document to be added to Reids vectorstore
     - cleanup : "none", "incremental", or "full"
     """
-    try:
-        recordManager = SQLRecordManager(
-            namespace=f"redis/{index_name}",
-            db_url=f"sqlite:///recordManager_{index_name}.sql"
-        )
-        index(
-            docs_source=documents,
-            vector_store=RedisVectorstore(),
-            record_manager=recordManager,
-            cleanup=cleanup,
-            source_id_key=source_id_key
-            )
-    except Exception as e:
-        print(f'An Error Occured: {e}')
+    recordManager = SQLRecordManager(
+        namespace=f"redis/{index_name}",
+        db_url=f"sqlite:///./data/recordManager_{index_name}.sql"
+    )
+    print(index(
+        docs_source=documents,
+        vector_store=RedisVectorstore(),
+        record_manager=recordManager,
+        cleanup=cleanup,
+        source_id_key=source_id_key
+        ))
 
-# # in settings.py
-# RedisVectorstore(
-#     embedding=OpenAIEmbeddings(),
-#     index_name="test_index",
-#     redis_url=os.getenv("REDIS_URL"),
-# )
+index_name = "test_index_10"
+RedisVectorstore(
+    embedding=OpenAIEmbeddings(),
+    index_name=index_name,
+    redis_url=os.getenv("REDIS_URL"),
+)
 
-# # from utils import RedisVectorstore
-# RedisVectorstore()
-# # Same object id
+# Batch Code
 
-# # 2개의 docstore만 유지 / 저장 directory 생성
-# docstore = loadObjectFromPickle(file_path="./docstore_20231125-011508")
-# A = retriever(
-#     vectorstore=RedisVectorstore(),
-#     docstore=docstore,
-#     id_key=source_id_key
-#     )
+initRecordManager(index_name=index_name)
 
-# B = retriever()
+parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
+timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
+child_docs = []
+for _parent_docs in parent_docs:
+    for _child_docs in transformParentdocsToChilddocs(parent_docs=_parent_docs):
+        child_docs.append(_child_docs)
+        print(_child_docs); input()
+addDocumentToRedis(documents=child_docs, index_name=index_name, cleanup=None)
 
-# # Disk 저장 => 안 좋은 점?
-# # 배치 처리 전에 저장 => 배치 처리 => 처리 후 삭제
+docstore = loadObjectFromPickle(file_path=f"./data/docstore_{timestamp}")
 
-# # 전역변수로 list 선언 = [['목차1', '내용1'], ['목차2', '내용2'], ...] => 모든 문서가 동시에 RAM에 올라감
-# # 문서들을 서버 Disk에 저장한 다음에 처리하고 삭제 가능 => 성능 향상
+# # Retriever Code
+
+# docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
+for key in docstore.yield_keys():
+    print(key); input()
+
+mv_retriever = retriever(
+    vectorstore=RedisVectorstore(),
+    docstore=docstore,
+    id_key=source_id_key
+    )
+
+relevant_docs = mv_retriever.vectorstore.similarity_search(query="의료공제")
+print(relevant_docs[0].page_content)
+print("-----")
+relevant_docs = mv_retriever.get_relevant_documents(query="의료공제")
+print(relevant_docs)
