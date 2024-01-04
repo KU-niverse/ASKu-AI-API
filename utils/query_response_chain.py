@@ -1,6 +1,7 @@
 import os, re, time
 import pickle, uuid
 from typing import Literal, List
+from typing import Optional
 
 from dotenv import load_dotenv, set_key
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
@@ -138,7 +139,7 @@ def loadObjectFromPickle(
         print(f"An Error Occured: {e}")
 
 def transformWikidocsToParentdocs(
-        data_dir) -> list[Document]:
+        data_dir) -> List[Document]:
     """
     Transform Wiki Document to the list of parent_docs of the type Document.
     
@@ -177,7 +178,7 @@ def mapSourceIdKey():
     return
 
 def saveDocstore(
-        parent_docs: list[Document], 
+        parent_docs: List[Document], 
         save_dir: str) -> None:
     """
     Save a InMemoryStore object to a file using the pickle module.
@@ -199,7 +200,7 @@ def saveDocstore(
     return timestamp
 
 def transformParentdocsToChilddocs(
-        parent_docs: list[Document]) -> list[Document]:
+        parent_docs: List[Document]) -> List[Document]:
     """
     Transform parent_docs to the list of child_docs of the type Document.
 
@@ -238,9 +239,9 @@ def initRecordManager(
     recordManager.create_schema()
 
 def addDocumentToRedis(
-        documents: list[Document], 
+        documents: List[Document], 
         index_name: str,
-        cleanup: Literal["incremental", "full"] | None=None) -> None:
+        cleanup: Optional[Literal["incremental", "full"]]=None) -> None:
     """
     Add documents to Redis vectorstore using langchain indexing API.
 
@@ -269,22 +270,22 @@ RedisVectorstore(
 
 # Batch Code
 
-initRecordManager(index_name=index_name)
+# initRecordManager(index_name=index_name)
 
-parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
-timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
-child_docs = []
-for _parent_docs in parent_docs:
-    for _child_docs in transformParentdocsToChilddocs(parent_docs=_parent_docs):
-        child_docs.append(_child_docs)
-        print(_child_docs); input()
-addDocumentToRedis(documents=child_docs, index_name=index_name, cleanup=None)
+# parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
+# timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
+# child_docs = []
+# for _parent_docs in parent_docs:
+#     for _child_docs in transformParentdocsToChilddocs(parent_docs=_parent_docs):
+#         child_docs.append(_child_docs)
+#         print(_child_docs); input()
+# addDocumentToRedis(documents=child_docs, index_name=index_name, cleanup=None)
 
-docstore = loadObjectFromPickle(file_path=f"./data/docstore_{timestamp}")
+# docstore = loadObjectFromPickle(file_path=f"./data/docstore_{timestamp}")
 
-# # Retriever Code
+# Retriever Code
 
-# docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
+docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
 for key in docstore.yield_keys():
     print(key); input()
 
