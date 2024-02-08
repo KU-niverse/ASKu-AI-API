@@ -151,7 +151,6 @@ def transform_WikiToParent(
         
     return parents
 
-
 def saveDocstore(
         parent_docs: list[Document], 
         save_dir: str) -> (str, dict):
