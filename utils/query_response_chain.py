@@ -69,18 +69,18 @@ class retriever(MultiVectorRetriever):
         """
         sub_docs = self.vectorstore.similarity_search(query, **self.search_kwargs)
         # We do this to maintain the order of the ids that are returned
-        print(sub_docs[0]); input()
+        # print(sub_docs[0]); input()
         ids = []
         for d in sub_docs:
             if d.metadata[self.id_key] not in ids:
                 ids.append(d.metadata[self.id_key])
-        print(ids)
+        # print(ids)
         keys = []
-        for (idx, key) in enumerate(self.docstore.yield_keys()):
-            print(idx, '\n', 
-                  "key=", key, '\n', self.docstore.mget(keys=[key]), '\n')
-            keys.append(key)
-        print(keys)
+        # for (idx, key) in enumerate(self.docstore.yield_keys()):
+        #     print(idx, '\n', 
+        #           "key=", key, '\n', self.docstore.mget(keys=[key]), '\n')
+        #     keys.append(key)
+        # print(keys)
         docs = self.docstore.mget(ids)
         return [d for d in docs if d is not None]
 
@@ -261,21 +261,13 @@ def addDocumentToRedis(
         ))
 
 index_name = "test_index_10"
-RedisVectorstore(
-    embedding=OpenAIEmbeddings(),
-    index_name=index_name,
-    redis_url=os.getenv("REDIS_URL"),
-    index_schema={
-        "text":[
-            {'name': 'doc_id'}
-        ]
-    }
-)
 
-# # Batch Code
 
+# 평생1번
 # initRecordManager(index_name=index_name)
 
+
+# # Batch Code
 # parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
 # timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
 # child_docs = []
@@ -287,12 +279,26 @@ RedisVectorstore(
 
 # docstore = loadObjectFromPickle(file_path=f"./data/docstore_{timestamp}")
 
-# Retriever Code
 
+
+# Retriever Code
+#redis랑 connection
+RedisVectorstore(
+    embedding=OpenAIEmbeddings(),
+    index_name=index_name,
+    redis_url=os.getenv("REDIS_URL"),
+    index_schema={
+        "text":[
+            {'name': 'doc_id'}
+        ]
+    }
+)
+# docstore불러오기
 docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
 # for key in docstore.yield_keys():
 #     print(key); input()
 
+# retrieval객체 만들기
 mv_retriever = retriever(
     vectorstore=RedisVectorstore(),
     docstore=docstore,
