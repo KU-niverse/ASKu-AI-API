@@ -1,6 +1,6 @@
 import os, re, time
 import pickle, uuid
-from typing import Literal, List
+from typing import Literal, List, Tuple
 
 from dotenv import load_dotenv, set_key
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
@@ -16,7 +16,18 @@ from singleton import singleton
 
 load_dotenv()
 embedding = OpenAIEmbeddings()
-source_id_key = "id"
+
+# wiki_data_loder
+from django.http import JsonResponse
+import requests
+
+def wiki_data_load():
+    response = requests.get('https://asku.wiki/api/wiki/pipeline')
+    if response.status_code == 200:
+        wiki_data = [[item['id'], item['text']] for item in response.json().get('docs', [])]
+        return wiki_data
+    else:
+        return None  # 요청 실패 처리
 
 @singleton
 class RedisVectorstore(Redis):
@@ -54,35 +65,6 @@ class retriever(MultiVectorRetriever):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
-    # Override
-    def _get_relevant_documents(
-        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
-    ) -> List[Document]:
-        """Get documents relevant to a query.
-        Args:
-            query: String to find relevant documents for
-            run_manager: The callbacks handler to use
-        Returns:
-            List of relevant documents
-        """
-        sub_docs = self.vectorstore.similarity_search(query, **self.search_kwargs)
-        # We do this to maintain the order of the ids that are returned
-        ids = ["afa0e50c-ab28-4c3f-98a5-8d9987918007"]
-        for d in sub_docs:
-            if d.metadata[self.id_key] not in ids:
-                ids.append(d.metadata[self.id_key])
-                # ids.append(d.metadata[self.id_key].split(":")[2])
-                # ids.append(d.metadata[self.id_key])
-        print(ids)
-        keys = []
-        for (idx, key) in enumerate(self.docstore.yield_keys()):
-            print(idx, '\n', 
-                  "key=", key, '\n', self.docstore.mget(keys=[key]), '\n')
-            keys.append(key)
-        print(keys)
-        docs = self.docstore.mget(ids)
-        return [d for d in docs if d is not None]
 
 
 def saveObjectToPickle(
@@ -137,48 +119,42 @@ def loadObjectFromPickle(
     except Exception as e:
         print(f"An Error Occured: {e}")
 
-def transformWikidocsToParentdocs(
-        data_dir) -> list[Document]:
+def transform_WikiToParent(
+        wiki_id: int, wiki_content: str) -> list[Document]:
     """
     Transform Wiki Document to the list of parent_docs of the type Document.
     
     Parameters:
-    - datadir: The directory where the wiki documents are located.
+    - wiki_id: the id number of wiki document data
+    - wiki_content: contents string of wiki document data
 
     Returns:
     - List[Document]: The list of parent document of the type Document. 
-    """
+    """    
     index_pat = re.compile(r"==\s*([^=(\\n)]+)\s*==(?!=)")
-    doc_name = ""
-    parent_docs = []
-    for i, doc in enumerate(os.listdir(data_dir)):
-        with open(os.path.join(data_dir, doc), mode="r+", encoding="utf-8") as f:
-            docs = f.readlines()
             
-        sections = re.split(pattern=index_pat, string=docs[0])
-        indexes = sections[1::2] 
-        contents = sections[2::2]
-        
-        for idx_name, content in list(zip(indexes, contents)):
-            content = content.replace("\\n", "")
-            content = content.replace("  ", " ")
-            parent_docs.append(Document(
-                page_content=content,
-                metadata={
-                    "doc_name": f"{doc_name}",
-                    "index_name": f"{idx_name.rstrip()}",
-                    source_id_key: str(uuid.uuid4())}
-                )
-            )
-    return parent_docs
-
-def mapSourceIdKey():
+    sections = re.split(pattern=index_pat, string=wiki_content)
+    section_title = sections[1::2] 
+    section_content = sections[2::2]
     
-    return
+    parents = []
+    for idx, (_title, _content) in enumerate(list(zip(section_title, section_content))):
+        parent_content = _content.replace("\\n", "")
+        parent_content = parent_content.replace("  ", " ")
+        parents.append(Document(
+            page_content=parent_content,
+            metadata={
+                # "section_title": f"{_title}",
+                source_id_key: f"{wiki_id}-{idx}",}
+            )
+        )
+        
+    return parents
+
 
 def saveDocstore(
         parent_docs: list[Document], 
-        save_dir: str) -> None:
+        save_dir: str) -> (str, dict):
     """
     Save a InMemoryStore object to a file using the pickle module.
 
@@ -196,10 +172,10 @@ def saveDocstore(
         addTimeSuffix=True)
     set_key(dotenv_path="./.env", key_to_set="docstoreTimestamp", value_to_set=timestamp)
     
-    return timestamp
+    return (timestamp, docstore)
 
-def transformParentdocsToChilddocs(
-        parent_docs: list[Document]) -> list[Document]:
+def transform_ParentToChild(
+        parent: list[Document]) -> list[Document]:
     """
     Transform parent_docs to the list of child_docs of the type Document.
 
@@ -212,11 +188,11 @@ def transformParentdocsToChilddocs(
     index_pat = re.compile(r'={3,}\s*([^=]+)\s*={3,}')
     splitter = RecursiveCharacterTextSplitter()
     
-    sections = re.split(pattern=index_pat, string=parent_docs.page_content)
+    sections = re.split(pattern=index_pat, string=parent.page_content)
     _sections = [sections[0]]
     for i in range(2, len(sections), 2):
         _sections.append(f"[[{sections[i-1].rstrip()}]] " + sections[i])
-    sections = [Document(page_content=section, metadata={source_id_key: parent_docs.metadata[source_id_key]})
+    sections = [Document(page_content=section, metadata={source_id_key: parent.metadata[source_id_key]})
                          for section in _sections]
 
     docs = splitter.split_documents(sections)
@@ -260,33 +236,52 @@ def addDocumentToRedis(
         source_id_key=source_id_key
         ))
 
-index_name = "test_index_10"
+
+# -------------------------------------- < Test Code > --------------------------------------
+# Configuration
+index_name = "test_index_9"
+source_id_key = "doc_id" # NEVER EDIT the source_id_key
+
+# ONLY once run the below codes at building server
+initRecordManager(index_name=index_name)
+
+# Run the below codes everytime server starts
 RedisVectorstore(
     embedding=OpenAIEmbeddings(),
     index_name=index_name,
     redis_url=os.getenv("REDIS_URL"),
-)
+    index_schema={
+        "text":[
+            {'name': 'doc_id'} # MUST be SAME with source_id_key
+        ]
+    }
+)	
 
-# Batch Code
+# Wiki document processing batch code
+_batchDocs = wiki_data_load()
 
-initRecordManager(index_name=index_name)
+_parentDocs, _childDocs = [], []
+for _document in _batchDocs:
+    _id, _content = int(_document[0]), _document[1]
 
-parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
-timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
-child_docs = []
-for _parent_docs in parent_docs:
-    for _child_docs in transformParentdocsToChilddocs(parent_docs=_parent_docs):
-        child_docs.append(_child_docs)
-        print(_child_docs); input()
-addDocumentToRedis(documents=child_docs, index_name=index_name, cleanup=None)
+    _parent = transform_WikiToParent(wiki_id=_id, wiki_content=_content)
+    _parentDocs += _parent
 
-docstore = loadObjectFromPickle(file_path=f"./data/docstore_{timestamp}")
+    for parent in _parent:
+        _child = transform_ParentToChild(parent=parent)
+        _childDocs += _child
 
-# # Retriever Code
+## Save Docstore at "./data/docstore_{timestamp}".
+timestamp, Docstore = saveDocstore(parent_docs=_parentDocs, save_dir="./data")
 
-# docstore = loadObjectFromPickle(file_path=f"./data/docstore_{os.getenv(key='docstoreTimestamp')}")
-for key in docstore.yield_keys():
-    print(key); input()
+## If need to clear the Redis index, then run the below
+addDocumentToRedis(documents=[], index_name=index_name, cleanup='full')
+## Update Redis
+addDocumentToRedis(documents=_childDocs, index_name=index_name, cleanup="incremental")
+
+# Initialize the MultiVector-Retreiever
+docstore_timestamp = os.getenv("docstoreTimestamp")
+docstore = loadObjectFromPickle(file_path=f"./data/docstore_{docstore_timestamp}")
 
 mv_retriever = retriever(
     vectorstore=RedisVectorstore(),
@@ -294,8 +289,9 @@ mv_retriever = retriever(
     id_key=source_id_key
     )
 
+# Test code for retriever
 relevant_docs = mv_retriever.vectorstore.similarity_search(query="의료공제")
-print(relevant_docs[0].page_content)
+print(f"Retreiever Test Result for similiarity_search: {relevant_docs[0].page_content}")
 print("-----")
 relevant_docs = mv_retriever.get_relevant_documents(query="의료공제")
-print(relevant_docs)
+print(f"Retreiever Test Result for get_relevant_documents: {relevant_docs}")
