@@ -254,7 +254,7 @@ RedisVectorstore(
             {'name': 'doc_id'} # MUST be SAME with source_id_key
         ]
     }
-)	
+)   
 
 # Wiki document processing batch code
 _batchDocs = wiki_data_load()
