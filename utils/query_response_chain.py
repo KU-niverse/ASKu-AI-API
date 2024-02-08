@@ -268,6 +268,17 @@ index_name = "test_index_10"
 
 
 # # Batch Code
+
+# RedisVectorstore(
+#     embedding=OpenAIEmbeddings(),
+#     index_name=index_name,
+#     redis_url=os.getenv("REDIS_URL"),
+#     index_schema={
+#         "text":[
+#             {'name': 'doc_id'}
+#         ]
+#     }
+# )
 # parent_docs = transformWikidocsToParentdocs("./data/wikidocs")
 # timestamp = saveDocstore(parent_docs=parent_docs, save_dir="./data")
 # child_docs = []
@@ -310,3 +321,4 @@ print(relevant_docs[0].page_content)
 print("-----")
 relevant_docs = mv_retriever.get_relevant_documents(query="의료공제")
 print(relevant_docs)
+
