@@ -6,6 +6,7 @@ import tiktoken
 from dotenv import load_dotenv
 from langchain.vectorstores.redis import Redis
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.retrievers.multi_vector import MultiVectorRetriever
 
 
 vectorstore = ["Redis"]
@@ -14,46 +15,41 @@ index_name = 'ku_rule_index_all_ver1'  # 'ku_rule', 'KU_RULE_05', 'ku_rule_index
 load_dotenv()
 
 
-def createVectorstoreIndex(database: str, texts, index_name: str) -> None:
-    if database not in vectorstore:
-        raise ValueError(f"{database} does not exist in vectorstore list in utils.py")
-    if database == "Redis":
-        Redis.from_texts(
-            texts=texts,
-            embedding=embedding(),
-            index_name=index_name,
-            redis_url=os.getenv("REDIS_URL")
-        )
-    return None
+def singleton(class_):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+
+    return get_instance
 
 
-def dropVectorstoreIndex(database: str, index_name: str) -> None:
-    if database not in vectorstore:
-        raise ValueError(f"{database} does not exist in vectorstore list in utils.py")
-
-    if database == "Redis":
-        result = Redis.drop_index(
-            index_name=index_name,
-            delete_documents=False,
-            redis_url=os.getenv("REDIS_URL")
-        )
-
-    if not result:
-        raise Exception("The index does not exist in the Vector Database.")
-
-    return None
+def getUserIpAddress(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def getVectorStore(database: str, index_name: str = "KU_RULE_05") -> Redis:
+
     if database not in vectorstore:
         raise ValueError(f"{database} does not exist in vectorstore list in utils.py")
-
     if database == "Redis":
         VectorStore = Redis.from_existing_index(
             embedding=embedding(),
             redis_url=os.getenv("REDIS_URL"),
-            index_name=index_name)
-
+            index_name=index_name,
+            schema={
+                "text":[
+                    {'name': 'doc_id'}  # MUST be SAME with source_id_key
+                ]
+            }
+        )
     return VectorStore
 
 
@@ -126,10 +122,42 @@ def getCompletion(query: str, relatedDocs):
     return message
 
 
-def getUserIpAddress(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+@singleton
+class RedisVectorstore(Redis):
+    """
+    Singleton Redis Object.
+
+    Must be Initialized in ./connfig/settings.py to call singleton object by RedisVectorstore().
+    ```
+        RedisVectorstore(
+            embedding=OpenAIEmbeddings(),
+            index_name="test_index",
+            redis_url=os.getenv("REDIS_URL"),
+        )
+    ```
+    Once create the RedisVectorstore class, the created RedisVectorstore can be called by RedisVectorstore().
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+@singleton
+class retriever(MultiVectorRetriever):
+    """
+    Singleton MultiVectorRetriever Object.
+
+    Must be Initialized in ./connfig/settings.py to call singleton object by retriever().
+    ```
+        docstore = loadObjectFromPickle(file_path="./docstore_20231125-011508")
+        retriever(
+            vectorstore=RedisVectorstore(),
+            docstore=docstore,
+            id_key=source_id_key
+            )
+    ```
+    Once create the retriever class, the created retriever can be called by retriever().
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
