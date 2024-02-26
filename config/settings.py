@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 SITE_ID = 1
 
-load_dotenv()
+load_dotenv(dotenv_path="./.env")
 env = environ.Env()
 env_file = Path(BASE_DIR)
 env.read_env(env_file, encoding='utf-8')

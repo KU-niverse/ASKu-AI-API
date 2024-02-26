@@ -351,7 +351,7 @@ pyvenv.cfg
 pip-selfcheck.json
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -374,3 +374,7 @@ pip-selfcheck.json
 
 # Ignore code-workspaces
 *.code-workspace
+
+# Local File
+data/
+systemprompt.txt
