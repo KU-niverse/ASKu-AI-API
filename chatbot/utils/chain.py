@@ -26,13 +26,13 @@ def ready_chain():
         index_name=os.getenv("WIKI_INDEX"),
         embedding=OpenAIEmbeddings(),
         schema={
-            "text": [{'name': 'doc_id'}]  # MUST be SAME with source_id_key
+            "text": [{'name': os.getenv("source_id_key")}, {'name': 'title'}]  # MUST be SAME with source_id_key
         })
 
     Wiki_retriever = MultiVectorRetriever(
         vectorstore=Wiki_Redis,
         docstore=docstore,
-        id_key="doc_id",
+        id_key=os.getenv("source_id_key"),
     )
     Rule_retriever = Redis(
         redis_url=os.getenv("REDIS_URL"),
