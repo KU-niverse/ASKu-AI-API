@@ -374,3 +374,7 @@ pip-selfcheck.json
 
 # Ignore code-workspaces
 *.code-workspace
+
+# Local File
+data/
+systemprompt.txt
