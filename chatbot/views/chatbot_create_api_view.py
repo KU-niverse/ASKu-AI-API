@@ -6,7 +6,7 @@ from rest_framework.exceptions import APIException
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils.utils import getRelatedDocs, getCompletion, getUserIpAddress
+from chatbot.utils.utils import getUserIpAddress
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit, check_ai_session_for_ip_address, create_ai_session_for_ip_address
 
 
@@ -73,10 +73,11 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             QueryChain = getattr(settings, "QueryChain", "localhost")
             QueryResponse = QueryChain.invoke({"input": user_question})
             assistant_content = QueryResponse["answer"]
-            reference = QueryResponse["context"]
-            # reference = getRelatedDocs(user_question, database="Redis")
-            # completion = getCompletion(user_question, reference)
-            # assistant_content = completion[-1]['content']['choices'][0]['message']['content']
+            reference = ""
+            for idx, document in enumerate(QueryResponse["context"]):
+                reference += f"{idx}: {document.page_content}"
+            reference.encode("utf-8")
+
             chat_answer = serializer.save(
                 session_id=session_id,
                 q_content=user_question,
@@ -89,7 +90,6 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 raise DatabaseError
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            print(e)
             end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
             if not end_result:
                 raise DatabaseError
