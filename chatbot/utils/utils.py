@@ -1,12 +1,7 @@
-import os
-from typing import Optional
+from typing import List
 
-import openai
-import tiktoken
-from dotenv import load_dotenv
-from langchain.vectorstores.redis import Redis
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain.retrievers.multi_vector import MultiVectorRetriever
+from langchain.schema import Document
+from json import dumps
 
 
 def getUserIpAddress(request):
@@ -16,3 +11,13 @@ def getUserIpAddress(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+    
+def formatReference(context: List[Document]):
+    reference = {"Rule": ""}
+    for document in context:
+        if "title" in document.metadata.keys():
+            reference[document.metadata["title"]] = document.page_content
+        else:
+            reference["Rule"] = reference["Rule"] + document.page_content + "\n"
+    
+    return dumps(reference, ensure_ascii=False)

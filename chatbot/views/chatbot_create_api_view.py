@@ -6,7 +6,7 @@ from rest_framework.exceptions import APIException
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils.utils import getUserIpAddress
+from chatbot.utils.utils import getUserIpAddress, formatReference
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit, check_ai_session_for_ip_address, create_ai_session_for_ip_address
 
 
@@ -73,10 +73,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             QueryChain = getattr(settings, "QueryChain", "localhost")
             QueryResponse = QueryChain.invoke({"input": user_question})
             assistant_content = QueryResponse["answer"]
-            reference = ""
-            for idx, document in enumerate(QueryResponse["context"]):
-                reference += f"{idx}: {document.page_content}"
-            reference.encode("utf-8")
+            reference = formatReference(QueryResponse["context"])
 
             chat_answer = serializer.save(
                 session_id=session_id,
