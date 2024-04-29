@@ -34,38 +34,38 @@ RULE_INDEX=RULE_INDEX
 PICKLE_PATH=PICKLE_PATH
 ```
 
-### 라이브러리 설정하기
+### 라이브러리 설정하기 
+#### pipenv
 ```shell
-# 만약 안되면 아래를 넣어보시길
-> Set-ExecutionPolicy Unrestricted -Scope Process
-# 가상환경 만들기
-> python -m venv venv
-# 가상환경 활성화
-## Windows
-> .\venv\Scripts\activate
-## Mac
-> source venv/bin/activate
-## 라이브러리 설치하기
-> pip install -r requirements.txt
-## django 실행하기
-> python manage.py migrate
-> python manage.py runserver
+# install & 가상환경 만들기
+> pipenv install
+
+# 가상환경 실행
+> pipenv shell 
+
+# 추가 패키지 설치하기
+> pipenv install 패키지명
+  `pip freeze > requirements.txt`과 같이 라이브러리 설치 후 명령어를 실행하지 않아도, pipenv는 자동으로 의존성 관리 파일을 업데이트합니다.
+
+# 패키지 라이브러리 버전 확인
+> pip show 패키지
+
+# 단일 명령어를 가상환경 내부 python으로 돌리기
+> pipenv run 명령어_블라블라
+
+# 의존성 그래프 출력
+> pipenv graph
+
+# 가상환경 삭제
+> pipenv --rm
+
 ```
 
 ### Tip! venv exit하는법
 ```shell
 > deactivate
 ```
-
-### Third party 설치하는 법
-
-```shell
-# 가상환경 활성화 후에!
-# 설치
-> pip intall blahblah
-# 다른 작업자가 이를 알 수 있게, requirements.txt에 반영하기
-> pip freeze > requirements.txt
-```
+ 
 
 ## 문서화 확인하는 방법
 - [127.0.0.1:8000/swagger](127.0.0.1:8000/swagger) 또는 [127.0.0.1:8000/redoc](127.0.0.1:8000/redoc) 접속하기 
