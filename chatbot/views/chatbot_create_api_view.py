@@ -3,6 +3,8 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import APIException
+import langwatch.langchain
+from langchain.schema.runnable import Runnable
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
@@ -70,8 +72,18 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
                 raise DatabaseError
             
-            QueryChain = getattr(settings, "QueryChain", "localhost")
-            QueryResponse = QueryChain.invoke({"input": user_question})
+            with langwatch.langchain.LangChainTracer(
+                metadata={
+                    "user_id": user_id,
+                    "thread_id": "AI_create_post",
+                }
+            ) as langWatchCallback:
+                QueryChain: Runnable = getattr(settings, "QueryChain", "localhost")
+                QueryResponse = QueryChain.invoke(
+                    {"input": user_question}, 
+                    config={"callbacks": [langWatchCallback]}
+                )
+
             assistant_content = QueryResponse["answer"]
             reference = formatReference(QueryResponse["context"])
 
