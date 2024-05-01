@@ -5,7 +5,7 @@ from django.conf import settings
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain.vectorstores.redis import Redis
 from langchain_openai import ChatOpenAI
-from langchain.chains import create_retrieval_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
 from langchain.retrievers import MergerRetriever, MultiVectorRetriever
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
