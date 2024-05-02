@@ -74,7 +74,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             
             with langwatch.langchain.LangChainTracer(
                 metadata={
-                    "user_id": user_id,
+                    "user_id": str(user_id),
                     "thread_id": "AI_create_post",
                 }
             ) as langWatchCallback:
