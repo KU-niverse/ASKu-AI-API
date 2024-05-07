@@ -3,6 +3,7 @@
 ## Dev Environment Setting
 
 ### 프로젝트 폴더 바로 아래에 .env 파일을 만들고 아래 내용을 넣어주세요.
+
 ```
 SECRET_KEY=your-secret-key
 IS_DEVELOP=True
@@ -32,16 +33,23 @@ RULE_INDEX=RULE_INDEX
 
 # PATH
 PICKLE_PATH=PICKLE_PATH
+
+# LANGFUSE SETTINGS
+LANGFUSE_SECRET_KEY=LANGFUSE_SECRET_KEY
+LANGFUSE_PUBLIC_KEY=LANGFUSE_PUBLIC_KEY
+LANGFUSE_HOST=https://cloud.langfuse.com
 ```
 
-### 라이브러리 설정하기 
+### 라이브러리 설정하기
+
 #### pipenv
+
 ```shell
 # install & 가상환경 만들기
 > pipenv install
 
 # 가상환경 실행
-> pipenv shell 
+> pipenv shell
 
 # 추가 패키지 설치하기
 > pipenv install 패키지명
@@ -61,11 +69,21 @@ PICKLE_PATH=PICKLE_PATH
 
 ```
 
+```장고_서버_실행
+# 마이그레이션
+> python manage.py migrate
+
+# 장고 서버 실행
+> python manage.py runserver
+
+```
+
 ### Tip! venv exit하는법
+
 ```shell
 > deactivate
 ```
- 
 
 ## 문서화 확인하는 방법
-- [127.0.0.1:8000/swagger](127.0.0.1:8000/swagger) 또는 [127.0.0.1:8000/redoc](127.0.0.1:8000/redoc) 접속하기 
+
+- [127.0.0.1:8000/swagger](127.0.0.1:8000/swagger) 또는 [127.0.0.1:8000/redoc](127.0.0.1:8000/redoc) 접속하기
