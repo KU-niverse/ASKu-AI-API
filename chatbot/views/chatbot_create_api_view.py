@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from langfuse.callback import CallbackHandler
 from rest_framework.generics import ListCreateAPIView
@@ -73,12 +75,10 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             
             QueryChain = getattr(settings, "QueryChain", "localhost")
 
-
             langfuse_handler = CallbackHandler(
-                secret_key= "",
-                public_key= "",
-                host="https://cloud.langfuse.com", # 🇪🇺 EU region
-              # host="https://us.cloud.langfuse.com", # 🇺🇸 US region
+                secret_key= os.getenv("LANGFUSE_SECRET_KEY"),
+                public_key= os.getenv("LANGFUSE_PUBLIC_KEY"),
+                host=os.getenv("LANGFUSE_HOST")
             )
             
             QueryResponse = QueryChain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
