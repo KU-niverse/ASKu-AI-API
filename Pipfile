@@ -29,6 +29,7 @@ langchain-openai = "==0.1.4"
 mysqlclient = "==2.2.4"
 redis = "==5.0.4"
 langwatch = "==0.0.18"
+langfuse = "*"
 
 [dev-packages]
 

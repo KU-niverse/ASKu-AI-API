@@ -9,6 +9,7 @@ from chatbot.models import Chatbot
 from chatbot.utils.utils import getUserIpAddress, formatReference
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit, check_ai_session_for_ip_address, create_ai_session_for_ip_address
 
+from langfuse.callback import CallbackHandler
 
 class DatabaseError(APIException):
     status_code = 500
@@ -71,7 +72,16 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 raise DatabaseError
             
             QueryChain = getattr(settings, "QueryChain", "localhost")
-            QueryResponse = QueryChain.invoke({"input": user_question})
+
+
+            langfuse_handler = CallbackHandler(
+                secret_key= "",
+                public_key= "",
+                host="https://cloud.langfuse.com", # 🇪🇺 EU region
+              # host="https://us.cloud.langfuse.com", # 🇺🇸 US region
+            )
+            
+            QueryResponse = QueryChain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
             assistant_content = QueryResponse["answer"]
             reference = formatReference(QueryResponse["context"])
 
