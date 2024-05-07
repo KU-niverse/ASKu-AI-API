@@ -1,4 +1,5 @@
 from django.conf import settings
+from langfuse.callback import CallbackHandler
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,7 +10,6 @@ from chatbot.models import Chatbot
 from chatbot.utils.utils import getUserIpAddress, formatReference
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end, check_question_limit, check_ai_session_for_ip_address, create_ai_session_for_ip_address
 
-from langfuse.callback import CallbackHandler
 
 class DatabaseError(APIException):
     status_code = 500
