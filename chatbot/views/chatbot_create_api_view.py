@@ -83,13 +83,20 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             
             assistant_content = QueryResponse["answer"]
             reference = formatReference(QueryResponse["context"])
+            requested_at = datetime.now()
             query_response = query_chain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
+            responsed_at = datetime.now()
+            latency = responsed_at - requested_at
+            latency_time = latency.total_seconds()
 
             chat_answer = serializer.save(
                 session_id=session_id,
                 q_content=user_question,
                 a_content=assistant_content,
                 reference=reference
+                requested_at=requested_at,
+                responsed_at=responsed_at,
+                latency_time=latency_time
             )
             serializer = ChatbotQnaSerializer(chat_answer)
             end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
