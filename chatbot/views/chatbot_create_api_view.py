@@ -54,10 +54,6 @@ class ChatbotCreateAPIView(ListCreateAPIView):
         session_id, user_id, is_questioning, processing_q, question_limit = session_info[:5]
         user_question = request.data['q_content']
 
-        if question_limit <= 0:
-            """ user가 1일 질문 횟수(5회)를 넘겼을 경우 오류 반환 """
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
         if is_questioning:
             """ 현재 진행중일 경우 오류 반환 """
             response_data = {
