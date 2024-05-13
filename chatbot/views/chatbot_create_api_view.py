@@ -72,18 +72,18 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             if not start_result:
                 """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
                 raise DatabaseError
-            
-            QueryChain = getattr(settings, "QueryChain", "localhost")
+
+            query_chain = getattr(settings, "QueryChain", "localhost")
 
             langfuse_handler = CallbackHandler(
-                secret_key= os.getenv("LANGFUSE_SECRET_KEY"),
-                public_key= os.getenv("LANGFUSE_PUBLIC_KEY"),
+                secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+                public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
                 host=os.getenv("LANGFUSE_HOST")
             )
             
-            QueryResponse = QueryChain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
             assistant_content = QueryResponse["answer"]
             reference = formatReference(QueryResponse["context"])
+            query_response = query_chain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
 
             chat_answer = serializer.save(
                 session_id=session_id,
