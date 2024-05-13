@@ -1,4 +1,7 @@
+import os
+
 from django.conf import settings
+from langfuse.callback import CallbackHandler
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -71,7 +74,14 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 raise DatabaseError
             
             QueryChain = getattr(settings, "QueryChain", "localhost")
-            QueryResponse = QueryChain.invoke({"input": user_question})
+
+            langfuse_handler = CallbackHandler(
+                secret_key= os.getenv("LANGFUSE_SECRET_KEY"),
+                public_key= os.getenv("LANGFUSE_PUBLIC_KEY"),
+                host=os.getenv("LANGFUSE_HOST")
+            )
+            
+            QueryResponse = QueryChain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
             assistant_content = QueryResponse["answer"]
             reference = formatReference(QueryResponse["context"])
 
