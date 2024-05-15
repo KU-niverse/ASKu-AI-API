@@ -72,6 +72,7 @@ def prompt_chain(prompt_version: str = "1.0"):
 
     return chat_prompt
 
+
 def llm_chain(prompt_chain):
     llm = ChatOpenAI(model="gpt-3.5-turbo")
     llm_chain = create_stuff_documents_chain(llm=llm, prompt=prompt_chain)
