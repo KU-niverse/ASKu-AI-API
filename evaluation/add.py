@@ -31,9 +31,9 @@ if __name__ == '__main__':
         for item in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             try:
                 assert item.get("Q")
-                assert item.get("G")
+                assert item.get("E")
                 input.append(item["Q"])
-                expected_output.append(item["G"])
+                expected_output.append(item["E"])
             except:
                 skipped.append(item)
 
