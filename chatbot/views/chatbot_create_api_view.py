@@ -78,7 +78,8 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             langfuse_handler = CallbackHandler(
                 secret_key= os.getenv("LANGFUSE_SECRET_KEY"),
                 public_key= os.getenv("LANGFUSE_PUBLIC_KEY"),
-                host=os.getenv("LANGFUSE_HOST")
+                host=os.getenv("LANGFUSE_HOST"),
+                user_id=str(user_id),
             )
             
             QueryResponse = QueryChain.invoke({"input": user_question}, config={"callbacks": [langfuse_handler]})
