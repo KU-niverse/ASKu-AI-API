@@ -7,8 +7,8 @@ import yaml
 
 
 parser = argparse.ArgumentParser(description="ASKu-AI-LangFuse: Add items into the LangFuse Dataset.")
-parser.add_argument("name", help="The name of LangFuse dataset which the items are added into.")
-parser.add_argument("path", help="The path of original items that you want to add.")
+parser.add_argument("name", type=str, help="The name of LangFuse dataset which the items are added into.")
+parser.add_argument("path", type=str, help="The path of original items that you want to add.")
 
 
 if __name__ == '__main__':

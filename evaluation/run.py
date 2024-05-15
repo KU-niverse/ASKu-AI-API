@@ -13,8 +13,8 @@ from utils.chain import retrievel_chain, prompt_chain, llm_chain
 from utils.batch import retrieval_batch, generation_batch
 
 parser = argparse.ArgumentParser(description="ASKu-AI-LangFuse: Run LangFuse experiment.")
-parser.add_argument("dataset", help="The name of LangFuse dataset for running LangFuse experiment.")
-parser.add_argument("prompt", help="The version of Prompt that will be injected in Generation step.")
+parser.add_argument("dataset", type=str, help="The name of LangFuse dataset for running LangFuse experiment.")
+parser.add_argument("prompt", type=int, help="The version of Prompt that will be injected in Generation step.")
 
 
 if __name__ == '__main__':
