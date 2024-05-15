@@ -10,6 +10,7 @@ from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate
 from langchain.retrievers import MergerRetriever, MultiVectorRetriever
 from langchain.storage.in_memory import InMemoryStore
 from langchain.vectorstores.redis import Redis
+from langfuse import Langfuse
 
 
 load_dotenv()
@@ -61,11 +62,9 @@ def retrievel_chain():
     return context_retriever
 
 
-def prompt_chain(prompt_version: str = "1.0"):
-    # TODO: LangFuse Dataset을 불러오는 기능으로 변경
-    # TODO: Default Version 설정
-    with open("systemprompt.txt", "r", encoding="utf-8") as f:
-        template = f.read()
+def prompt_chain(prompt_name: str = "RAG", prompt_version: int = 1):
+    langfuse = Langfuse(); langfuse.auth_check()
+    template = langfuse.get_prompt(name=prompt_name, version=prompt_version).prompt
 
     Systemprompt = SystemMessagePromptTemplate.from_template(template=template)
     chat_prompt = ChatPromptTemplate.from_messages([Systemprompt])

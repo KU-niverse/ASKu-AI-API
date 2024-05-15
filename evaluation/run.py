@@ -61,7 +61,7 @@ if __name__ == '__main__':
     
     # ---------- < STEP2: Generation > ----------
     ## Prompt Injection
-    prompt = prompt_chain(prompt_version=prompt_version)
+    prompt = prompt_chain(prompt_name="RAG", prompt_version=prompt_version)
 
     ## Generation Chain
     generation_chain = llm_chain(prompt_chain=prompt)
