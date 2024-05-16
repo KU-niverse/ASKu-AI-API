@@ -23,6 +23,9 @@ class ChatbotQnaSerializer(serializers.Serializer):
             "a_content",
             "reference",
             "created_at",
+            "requested_at",
+            "responsed_at",
+            "latency_time",
         ]
 
     def create(self, validated_data):
@@ -31,10 +34,16 @@ class ChatbotQnaSerializer(serializers.Serializer):
         q_content = validated_data['q_content']
         a_content = validated_data['a_content']
         reference = validated_data['reference']
+        requested_at = validated_data['requested_at']
+        responsed_at = validated_data['responsed_at']
+        latency_time = validated_data['latency_time']
+
         with connection.cursor() as cursor:
             sql = """
-                INSERT INTO ai_history (session_id, q_content, a_content, reference, created_at)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO ai_history (
+                    session_id, q_content, a_content, reference, created_at, requested_at, responsed_at, latency_time
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = [
                 session_id,
@@ -42,6 +51,9 @@ class ChatbotQnaSerializer(serializers.Serializer):
                 a_content,
                 reference,
                 created_at,
+                requested_at,
+                responsed_at,
+                latency_time,
             ]
             cursor.execute(sql, values)
         with connection.cursor() as cursor:
