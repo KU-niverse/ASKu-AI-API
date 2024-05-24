@@ -1,7 +1,7 @@
 from django.urls import path
 
 from chatbot.views import ChatbotCreateAPIView, ChatbotListUpdateAPIView, \
-    FeedbackCreateAPIView, FeedbackCommentCreateAPIView, ChatbotCheckAPIView
+    FeedbackCreateAPIView, FeedbackCommentCreateAPIView, ChatbotCheckAPIView, ChatbotStreamAPIView
 
 app_name = "chatbot"
 
@@ -10,6 +10,11 @@ urlpatterns = [
         "",
         ChatbotCreateAPIView.as_view(),
         name="Chatbot",
+    ),
+    path(
+        "stream/",
+        ChatbotStreamAPIView.as_view(),
+        name="ChatbotStream",
     ),
     path(
         "<int:user_id>",
