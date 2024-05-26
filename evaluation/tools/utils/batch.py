@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import List, Coroutine
 
 from langchain_core.runnables import Runnable
@@ -22,7 +23,8 @@ async def retrieval_batch(
         batch_results: List[List[Document]] = await asyncio.gather(*batch_list, return_exceptions=True)
         results.extend(batch_results)
         batch_list = []
-    
+        time.sleep(5)
+        
     if batch_list:
         batch_results: List[List[Document]] = await asyncio.gather(*batch_list, return_exceptions=True)
         results.extend(batch_results)
@@ -47,6 +49,7 @@ async def generation_batch(
         batch_results: List[str] = await asyncio.gather(*batch_list, return_exceptions=True)
         results.extend(batch_results)
         batch_list = []
+        time.sleep(5)
     
     if batch_list:
         batch_results: List[str] = await asyncio.gather(*batch_list, return_exceptions=True)

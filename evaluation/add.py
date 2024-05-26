@@ -1,8 +1,10 @@
 import argparse
+import json
 import os
 from typing import List, Union
 
 from langfuse import Langfuse
+from tqdm import tqdm
 import yaml
 
 
@@ -20,30 +22,20 @@ if __name__ == '__main__':
     langfuse = Langfuse(); langfuse.auth_check()
 
     # ---------- < Validation > ----------
-    # TODO: Notion API 연동으로 변경
     # item 파일(.yaml)의 형식은 고정되어 있습니다. 아래 Notion 페이지에서 확인가능합니다.
-    # https://www.notion.so/034179/LangFuse-b654dacc89714db7a12fa00fc999b585?pvs=4#bae7954f4bdf4d9092117fbca04f78cb
+    # https://www.notion.so/034179/AI-Data-62f2bb5ec98e4830a2d7c7e50e9cd836
     input: List[str] = []
     expected_output: List[str] = []
     skipped: List[dict] = []
     item: dict[str, str]
     with open(item_path, "r", encoding="utf-8") as f:
         for item in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
-            try:
-                assert item.get("Q")
-                assert item.get("E")
-                input.append(item["Q"])
-                expected_output.append(item["E"])
-            except:
-                skipped.append(item)
-
-    if skipped: 
-        print(f"Validation Failed: {len(skipped)} original items have invalid schema. Check the keys of original items.")
-        raise(KeyError)
+            input.append(json.dumps({"Q": item["Q"], "C": item["C"]}))
+            expected_output.append(item["E"])
 
     # ---------- < Add > ----------
     langfuse.create_dataset(name=dataset_name)
-    for q, e in list(zip(input, expected_output)):
+    for q, e in tqdm(list(zip(input, expected_output))):
         langfuse.create_dataset_item(
             dataset_name=dataset_name,
             input=q,

@@ -5,36 +5,29 @@ import os
 from typing import List
 
 from datasets import Dataset
-from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
 from langchain.schema import Document
 from langchain.retrievers import MergerRetriever
 from langfuse import Langfuse
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_correctness, context_relevancy, answer_similarity
+from ragas.metrics import context_relevancy
 from ragas.metrics.base import MetricWithLLM
 
-from tools.generators.prompt import load_prompt
-from tools.generators.llm import get_OPENAI_llm
 from tools.vectorstores.redis_store import RuleRedisStore, WikiRedisStore
 from tools.retrievers.multivector_retriever import get_multivector_retriever
 from tools.utils import batch
 
 
-parser = argparse.ArgumentParser(description="Evaluate RAG Pipeline using LangFuse and Ragas.")
+parser = argparse.ArgumentParser(description="Evaluate retrieval capability using LangFuse and Ragas.")
 parser.add_argument("-dataset", type=str, default="RAG_v1.1", help="LangFuse dataset name.")
-parser.add_argument("-prompt_name", type=str, default="RAG", help="LangFuse prompt name.")
-parser.add_argument("-prompt_version", type=int, default=1, help="LangFuse prompt version.")
 
 
 if __name__ == '__main__':
     # ---------- < Configuration > ---------- 
     exec_args = parser.parse_args()
     dataset_name: str = exec_args.dataset
-    prompt_name: str = exec_args.prompt_name
-    prompt_version: int = exec_args.prompt_version
 
     langfuse = Langfuse(); langfuse.auth_check()
-    metrics: List[MetricWithLLM] = [faithfulness, answer_correctness, context_relevancy, answer_similarity]
+    metrics: List[MetricWithLLM] = [context_relevancy]
     async_concurrency_level = 3
     
     # ---------- < Load > ----------
@@ -43,12 +36,12 @@ if __name__ == '__main__':
     # TODO: dataset 유효성 검사
     items: List[dict] = [json.loads(item.input) for item in dataset.items]
     question: List[str] = [item["Q"] for item in items]
-    # contexts: List[List[str]] = [[item["C"]] for item in items]
-    ground_truth: List[str] = [item.expected_output for item in dataset.items]
+    ground_truth: List[str] = [item["C"] for item in items]
+    # ground_truth: List[str] = [item.expected_output for item in dataset.items]
 
     # Tracing
-    trace = langfuse.trace(name = "RAG")
-    
+    trace = langfuse.trace(name = "Retrieval")
+
     # ---------- < STEP1: Retrieval > ----------
     # Vectorstore
     rule_redis = RuleRedisStore().get_redis_store(index_name=os.getenv("RULE_INDEX"))
@@ -81,39 +74,13 @@ if __name__ == '__main__':
     trace.span(
         name = "retrieval", input={'question': question}, output={'contexts': contexts}
     )
-    
-    # ---------- < STEP2: Generation > ----------
-    # Prompt
-    prompt = load_prompt(prompt_name=prompt_name, prompt_version=prompt_version)
-    
-    # LLM
-    llm = get_OPENAI_llm(temperature=0.7)
-    
-    # Generators
-    generation_chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
 
-    # Generation
-    answer: List[str] = asyncio.run(
-        batch.generation_batch(
-            generator=generation_chain,
-            question=question,
-            contexts=raw_contexts,
-            concurrency_level=async_concurrency_level
-        )
-    )
-
-    # Tracing
-    trace.span(
-        name = "generation", input={'question': question, 'contexts': contexts}, output={'answer': answer}
-    )
-
-    # ---------- < STEP3: Experiment > ----------
+    # ---------- < STEP2: Experiment > ----------
     # Calculate scores
     dataset = Dataset.from_dict(
         {
             'question': question,
             'ground_truth': ground_truth,
-            'answer': answer,
             'contexts': contexts,
         }
     )
