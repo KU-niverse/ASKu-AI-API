@@ -59,7 +59,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 """ 쿼리가 성공적으로 수행되지 못한 경우 오류 처리 """
                 raise DatabaseError
 
-            query_chain = getattr(settings, "QueryChain", "localhost")
+            query_chain = getattr(settings, "query_chain", "localhost")
 
             langfuse_handler = CallbackHandler(
                 secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
