@@ -46,7 +46,7 @@ def ready_chain():
     # ├ ChatPromptTemplate
     # ├─ SystemPromptTemplate
     # └ ChatOpenAI
-    llm = ChatOpenAI(model="gpt-3.5-turbo")
+    llm = ChatOpenAI(model="gpt-4o")
     with open("systemprompt.txt", "r", encoding="utf-8") as f:
         template = f.read()
     Systemprompt = SystemMessagePromptTemplate.from_template(template=template)
