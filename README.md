@@ -95,6 +95,10 @@ MANAGE_SCHEMA_PATH="./data/schema/manage_schema.yaml"
 
 # 가상환경 실행
 > pipenv shell
+```
+
+아래의 명령어들은 개발을 하며 알아두면 좋은 명령어입니다.
+```shell
 
 # 추가 패키지 설치하기
 > pipenv install 패키지명
@@ -121,10 +125,30 @@ MANAGE_SCHEMA_PATH="./data/schema/manage_schema.yaml"
 script 디렉토리에는 RAG Vectorstore를 구성하는 데 필요한 데이터의 적재, 로드 및 저장과 관련된 코드들이 위치합니다. \
 모든 코드는 가상환경을 활성화 한 후 실행해주세요.
 
+#### 3.1 VectorDB Setting
+다음 명령어를 실행해주세요.
+```shell
+# 학칙 script 실행
+> python script/manage_rule.py -SETUP True
+
+# Wiki script 실행
+> python script/manage_wiki.py -SETUP True
+
+```
+script를 실행하는데 약간의 시간이 소요됩니다.
+
+학칙 script는 실행 후 출력이 없습니다. 
+Wiki script는 실행 후 다음과 같이 출력됩니다. \
+{'num_added': 395, 'num_updated': 0, 'num_skipped': 0, 'num_deleted': 0}
+
+
+##### VectorDB Setup 부가 설명
 ```shell
 # script 실행
 > python script/{script_name}.py
+
 ```
+
 몇몇 스크립트는 Optional Argument 파라미터를 입력받습니다. (Optional이기 때문에 입력하지 않아도 작동합니다.) \
 스크립트 실행 명령 뒤에 "-h" 키워드를 추가하여 Optional Argument에 대한 설명을 확인할 수 있습니다.
 ```shell
@@ -142,7 +166,7 @@ optional arguments:
 '
 ```
 
-#### Vectorstore Index Inspection
+#### 3.2 VectorDB Index Inspection
 Redis Vectorstore Indexing과 관련된 코드를 작업한 후에는 반드시 Index가 제대로 생성되었는 지 확인해주세요. \
 Redis가 설치된 Docker Container의 터미널, 또는 그 터미널과 통합된 Linux Terminal에 접속해주세요.
 
