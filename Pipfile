@@ -29,6 +29,7 @@ langchain-openai = "==0.1.4"
 mysqlclient = "==2.2.4"
 redis = "==5.0.4"
 langfuse = "2.29.0"
+"pdfminer.six" = "==20231228"
 
 [dev-packages]
 
