@@ -1,5 +1,7 @@
 import os
+
 from utils.kopas_parser import extract_QA, save_txt
+
 
 keywords = [
     '학생증',    '졸업',     '대학원',   '휴학',         '전과',     '자퇴', 
@@ -48,3 +50,4 @@ for keyword in keywords:
 
     with open(f"./output/QA_ext/{keyword}.txt", "w+", encoding="utf-8") as f:
         for line in ext: f.write(line)
+
