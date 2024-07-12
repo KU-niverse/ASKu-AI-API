@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from django.conf import settings
 
-from evaluation.product.haho import ready_chain
+from evaluation.product.haho_v1 import ready_chain
 
 
 class ChatbotConfig(AppConfig):
