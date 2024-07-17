@@ -1,53 +1,58 @@
 import os
+from typing import List
+
+from dotenv import load_dotenv
+import yaml
 
 from utils.kopas_parser import extract_QA, save_txt
 
 
-keywords = [
-    '학생증',    '졸업',     '대학원',   '휴학',         '전과',     '자퇴', 
-    '퇴학',      '징계',     '학식',     '수면실',   '스터디룸',     '열람실',
-    '도서관',    '프린터',   '와이파이', '셔틀버스',     '기숙사',   '수강신청',
-    '초과학점',  '수희등',   '전필',     '교양',         '결석',     '선수강',
-    '계절학기',  '폐강',     '지하철',   '밥약',         '보은',     '고연전',
-    '동아리',    '장학금',   '근장',     '교환학생',     '이중전공', '심전'
-]
-
-txt_names = [
-    "QA24_1.txt", "QA24_0.txt", "QA23.txt", "QA22.txt"
-]
+load_dotenv()
 
 
-# ---------- [ Extraction ] ----------
+if __name__ == '__main__':
+    # ---------- < Configuration > ----------
+    with open(os.getenv("DATA_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
+        for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
+            if config["Name"] == "Kopas":
+                data_config = config
+                kopas_vars = data_config["Variables"]
+                kopas_meta = data_config["Metadata"]
 
-if not os.path.exists("./output/"): os.mkdir("./output/")
+    ext_dir: str = kopas_vars["kopas_ext_dir"]
+    keywords: List[str] = kopas_vars["keywords"]
+    out_dir: str = kopas_vars["kopas_out_dir"]
+    raw_dir: str = kopas_vars["kopas_raw_dir"]
 
-for idx in range(len(txt_names)):
-    txt_name = txt_names[idx]
+    if not os.path.exists(raw_dir): raise FileNotFoundError
+    if not os.path.exists(out_dir): os.makedirs(out_dir)
+    if not os.path.exists(ext_dir): os.makedirs(ext_dir)
+
+    # ---------- [ Extraction ] ----------
+    for txt_name in os.listdir(raw_dir):
+        for keyword in keywords:
+            QA_ext = extract_QA(
+                txt_path=os.path.join(raw_dir, txt_name),
+                keyword=keyword,
+            )
+
+            save_name = txt_name.rstrip(".txt") + f"_{keyword}.txt"
+
+            if not os.path.exists(os.path.join(ext_dir, txt_name.rstrip(".txt"))):
+                os.makedirs(os.path.join(ext_dir, txt_name.rstrip(".txt")))
+
+            save_txt(
+                path=os.path.join(ext_dir, txt_name.rstrip(".txt"), save_name),
+                texts=QA_ext,
+            )
+
+    # ---------- [ Merge ] ----------
     for keyword in keywords:
-        QA_ext = extract_QA(
-            txt_path=os.path.join("data", txt_name),
-            keyword=keyword,
-        )
-
-        save_dir = f'./output/{txt_name[:-4]}_ext/'
-        save_name = f'{txt_name[:-4]}_{keyword}.txt'
-        if not os.path.exists(save_dir): os.mkdir(save_dir)
+        merged = []
+        for raw_name in os.listdir(ext_dir):
+            with open(os.path.join(ext_dir, raw_name, f'{raw_name}_{keyword}.txt'), "r+", encoding="utf-8") as f:
+                merged.extend(f.readlines())
 
         save_txt(
-            path=os.path.join(save_dir, save_name),
-            texts=QA_ext,
-        )
-
-# ---------- [ Merge ] ----------
-
-if not os.path.exists("./output/QA_ext/"): os.mkdir("./output/QA_ext/")
-
-for keyword in keywords:
-    ext = []
-    for txt_name in txt_names:
-        with open(f"./output/{txt_name[:-4]}_ext/{txt_name[:-4]}_{keyword}.txt", "r+", encoding="utf-8") as f:
-            ext.extend(f.readlines())
-
-    with open(f"./output/QA_ext/{keyword}.txt", "w+", encoding="utf-8") as f:
-        for line in ext: f.write(line)
-
+            path=os.path.join(out_dir, f'{keyword}.txt'),
+            texts=merged)
