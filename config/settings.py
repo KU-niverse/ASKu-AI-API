@@ -46,9 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'drf_yasg',
-    'rest_framework',
-    'chatbot',
     'corsheaders',
+    'rest_framework',
+    'django_celery_beat',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -196,3 +197,9 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+# celery 설정
+CELERY_BROKER_URL = env("REDIS_URL")
+CELERY_RESULT_BACKEND = env("REDIS_URL")
+CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_ENABLE_UTC = False
