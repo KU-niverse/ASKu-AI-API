@@ -1,6 +1,7 @@
 from django.apps import AppConfig
+from django.conf import settings
 
-from chatbot.utils.chain import ready_chain
+from evaluation.product.haho_v1 import ready_chain
 
 
 class ChatbotConfig(AppConfig):
@@ -8,4 +9,5 @@ class ChatbotConfig(AppConfig):
     name = 'chatbot'
 
     def ready(self):
-        ready_chain()
+        query_chain = ready_chain()
+        setattr(settings, "query_chain", query_chain)

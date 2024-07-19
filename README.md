@@ -7,43 +7,45 @@
 3. VectorDB Setup
 4. Django Setup
 
-### 1. Docker Setup 
+### 1. Docker Setup
 Local Redis-stack Docker Container 환경을 필요로 합니다.
 Local Docker Setup과 관련된 절차는 [Notion: Docker Setting](https://www.notion.so/034179/Docker-Setting-9a9b108fa0944d5c9553bfdc0974e035)을 확인해주세요.
 
-### 2. Environment Setup 
+### 2. Environment Setup
 #### 2.1 Directory Setting
-[Notion: Data Files](https://www.notion.so/034179/ASKu-AI-API-992c992ed43249a6afd91852dfad7d7c)에 접속하여 data, schema, systemprompt.txt .env 파일들을 다운받은 후 아래와 같이 디렉토리를 구성해주세요.
+[Notion: Data Files](https://www.notion.so/034179/ASKu-AI-API-992c992ed43249a6afd91852dfad7d7c)에 접속하여 data, schema, .env 파일들을 다운받은 후 아래와 같이 디렉토리를 구성해주세요.
 
 ```Plain text
-. 
+.
 ├─ chatbot
 ├─ config
 ├─ data
+│  ├─kopas
+│  │   └─raw
 │  ├─rule (생략)
 │  │   ├─제10편 내규
 │  │   ├─제2편 학칙 및 학위수여규정
 │  │   ├─제3편 학사관리-교무행정
 │  │   ├─제3편 학사관리-학생행정
 │  │   └─제5편 부속기관
-│  ├─schema 
+│  ├─schema
 │  │   ├─data_schema.yaml
 │  │   ├─eval_schema.yaml
-│  │   └─manaage_schema.yaml 
+│  │   └─manaage_schema.yaml
 │  ├─docstore(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
 │  └─RecordManager(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
 ├─ script
-│  └─utils 
-├─ .env 
-├─ .gitignore 
+│  └─utils
+├─ .env
+├─ .gitignore
 ├─ manage.py
 ├─ Pipfile
-├─ Pipfile.lock 
+├─ Pipfile.lock
 └─ systemprompt.txt
 ```
 
 ##### Dotenv Setting
-Dotenv 파일은 아래의 항목들로 구성되어 있습니다. 
+Dotenv 파일은 아래의 항목들로 구성되어 있습니다.
 ```
 SECRET_KEY=your-secret-key
 IS_DEVELOP=True
@@ -137,7 +139,7 @@ script 디렉토리에는 RAG Vectorstore를 구성하는 데 필요한 데이�
 ```
 script를 실행하는데 약간의 시간이 소요됩니다.
 
-학칙 script는 실행 후 출력이 없습니다. 
+학칙 script는 실행 후 출력이 없습니다.
 Wiki script는 실행 후 다음과 같이 출력됩니다. \
 {'num_added': 395, 'num_updated': 0, 'num_skipped': 0, 'num_deleted': 0}
 
