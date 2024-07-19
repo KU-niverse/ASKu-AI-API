@@ -12,3 +12,13 @@ app.config_from_object(
 app.autodiscover_tasks()
 app.conf.timezone = 'Asia/Seoul'
 
+app.conf.beat_schedule = {
+    "weekly-wiki-data-update": {
+        "task": "chatbot.tasks.wiki_data_schedule",
+        "schedule": crontab(
+            minute=0,
+            hour=3,
+            day_of_week='monday'
+        )
+    }
+}
