@@ -83,6 +83,10 @@ if __name__ == '__main__':
 
     # ---------- < Saving > ----------
     # Save timing of InMemoryStore is intentionally delayed for synchronizing with RecordManager
+    with open(os.path.join(InMemoryStore_dir, "docstore_wiki")+".pickle", 'wb') as f:
+        pickle.dump(new_InMemoryStore, f, pickle.HIGHEST_PROTOCOL)
+
     timestamp = time.strftime('%Y%m%d-%I%M%S', time.localtime())
-    with open(os.path.join(InMemoryStore_dir, "docstore_"+timestamp)+".pickle", 'wb') as f:
+    file_path = os.path.join(InMemoryStore_dir, "docstore/docstore_" + timestamp + ".pickle")
+    with open(file_path, 'wb') as f:
         pickle.dump(new_InMemoryStore, f, pickle.HIGHEST_PROTOCOL)
