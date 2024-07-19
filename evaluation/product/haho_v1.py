@@ -5,18 +5,19 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
 from langchain.retrievers import MergerRetriever
 
-from ..tools.generators.prompt import load_prompt
 from ..tools.generators.llm import get_OPENAI_llm
+from ..tools.generators.prompt import load_prompt
 from ..tools.retrievers.multivector_retriever import get_multivector_retriever
 from ..tools.vectorstores.redis_store import RuleRedisStore, WikiRedisStore
 
 
 load_dotenv()
 
-def ready_chain():    
+
+def ready_chain():
     # Vectorstore
-    rule_redis = RuleRedisStore().get_redis_store(index_name=os.getenv("RULE_INDEX"))
-    wiki_redis = WikiRedisStore().get_redis_store(index_name=os.getenv("WIKI_INDEX"))
+    rule_redis = RuleRedisStore().get_redis_store(index_name=os.getenv('RULE_INDEX'))
+    wiki_redis = WikiRedisStore().get_redis_store(index_name=os.getenv('WIKI_INDEX'))
 
     # Retrievers
     rule_retriever = rule_redis.as_retriever(
