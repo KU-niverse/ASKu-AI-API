@@ -10,7 +10,8 @@ from langchain_core.retrievers import BaseRetriever
 
 def get_multivector_retriever(
         vectorstore: VectorStore, 
-        docstore_path: Union[os.PathLike, str]
+        docstore_path: Union[os.PathLike, str],
+        k: int = 4,
     ) -> BaseRetriever:
 
     with open(docstore_path, "rb") as f:
@@ -20,6 +21,7 @@ def get_multivector_retriever(
         vectorstore=vectorstore,
         docstore=docstore,
         id_key=os.getenv("source_id_key"),
+        search_kwargs={"k": k},
     )
 
     return Wiki_retriever
