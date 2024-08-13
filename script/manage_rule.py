@@ -37,7 +37,7 @@ if __name__ == '__main__':
             # rule_pages: List[Document] = [(page1), (page2), (page3), ...]
             rule_contents = ''.join([page.page_content for page in rule_pages])
             rule_all.append(Document(page_content=rule_contents, metadata={"file_name": file_name}))
-    
+
     # ---------- < Parsing > ----------
     rule_parsed = Ruleparser(config=data_config).parse(items=rule_all)
 
@@ -47,17 +47,16 @@ if __name__ == '__main__':
     with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "RULE_SETUP": 
-                wiki_config = config
+                rule_config = config
 
     # ---------- < Indexing > ----------
     from langchain_community.vectorstores.redis import Redis
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-
     Embedding = OpenAIEmbeddings()
     Redis.from_texts(texts=rule_parsed,
-                     redis_url=wiki_config["Vectorstore"]["url"],
-                     index_name=wiki_config["Vectorstore"]["index_name"],
+                     redis_url=rule_config["Vectorstore"]["url"],
+                     index_name=rule_config["Vectorstore"]["index_name"],
                      embedding=Embedding,
-                     index_schema=wiki_config["Vectorstore"]["index_schema"]
-                    )
+                     index_schema=rule_config["Vectorstore"]["index_schema"]
+                     )
