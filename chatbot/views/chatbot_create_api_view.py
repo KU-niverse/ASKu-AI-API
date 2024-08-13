@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 
 from chatbot.serializers.chatbot_qna_serializer import ChatbotQnaSerializer
 from chatbot.models import Chatbot
-from chatbot.utils.utils import formatReference
+from chatbot.utils.utils import formatReference, get_recommended_questions
 from chatbot.utils.db_query import check_ai_session, ai_session_start, ai_session_end
 
 
@@ -79,6 +79,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
                 q_content=user_question,
                 a_content=query_response["answer"],
                 reference=formatReference(query_response["context"]),
+                recommended_questions=get_recommended_questions(user_question),
                 requested_at=requested_at,
                 responsed_at=responsed_at,
                 latency_time=latency_time
