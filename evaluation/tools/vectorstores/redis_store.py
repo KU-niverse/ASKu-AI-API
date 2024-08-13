@@ -43,3 +43,16 @@ class WikiRedisStore(RedisStore):
             index_schema=self.schema
         )
         return wiki_redis
+
+
+class QuestionRedisStore(RedisStore):
+    schema = {}
+
+    def get_redis_store(self, index_name) -> Redis:
+        question_redis = Redis(
+            redis_url=RedisStore.redis_url,
+            embedding=RedisStore.embedding,
+            index_name=index_name,
+            index_schema=self.schema
+        )
+        return question_redis
