@@ -1,8 +1,13 @@
 from abc import ABC, abstractmethod
 import os
 
+from dotenv import load_dotenv
+
 from langchain.vectorstores.redis import Redis
 from langchain_openai.embeddings import OpenAIEmbeddings
+
+
+load_dotenv()
 
 
 class RedisStore(ABC):
