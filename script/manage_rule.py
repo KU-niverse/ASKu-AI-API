@@ -54,7 +54,7 @@ if __name__ == '__main__':
     from langchain_openai.embeddings import OpenAIEmbeddings
 
 
-    Embedding = OpenAIEmbeddings()
+    Embedding = OpenAIEmbeddings(model="text-embedding-3-large", dimensions=3072)
     Redis.from_texts(texts=rule_parsed,
                      redis_url=wiki_config["Vectorstore"]["url"],
                      index_name=wiki_config["Vectorstore"]["index_name"],

@@ -7,7 +7,7 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 
 class RedisStore(ABC):
     redis_url = os.getenv("REDIS_URL")
-    embedding = OpenAIEmbeddings()
+    embedding = OpenAIEmbeddings(model="text-embedding-3-large", dimensions=3072)
     
     @abstractmethod
     def get_redis_store(self) -> Redis:

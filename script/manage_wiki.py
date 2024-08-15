@@ -63,7 +63,7 @@ if __name__ == '__main__':
     from langchain_openai.embeddings import OpenAIEmbeddings
 
 
-    Embedding = OpenAIEmbeddings()
+    Embedding = OpenAIEmbeddings(model="text-embedding-3-large", dimensions=3072)
     RecordManager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{os.path.join(RecordManager_dir, 'RecordManager_'+index_name)}.sql")
     RecordManager.create_schema()

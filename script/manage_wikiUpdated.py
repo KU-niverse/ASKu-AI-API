@@ -64,7 +64,7 @@ def manage_wiki_update(update: bool = False):
     from langchain.indexes import SQLRecordManager, index
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
+    Embedding = OpenAIEmbeddings(model="text-embedding-3-large", dimensions=3072)
     RecordManager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{RecordManager_path}")
 
