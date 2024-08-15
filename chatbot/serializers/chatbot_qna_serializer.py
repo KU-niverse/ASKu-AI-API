@@ -11,6 +11,10 @@ class ChatbotQnaSerializer(serializers.Serializer):
     q_content = serializers.CharField(required=True)
     a_content = serializers.CharField(required=False)
     reference = serializers.CharField(required=False)
+    recommended_questions = serializers.ListField(
+        child=serializers.CharField(),
+        required=False
+    )
     session_id = serializers.IntegerField(required=False)
 
     class Meta:
@@ -22,6 +26,7 @@ class ChatbotQnaSerializer(serializers.Serializer):
             "q_content",
             "a_content",
             "reference",
+            "recommended_questions",
             "created_at",
             "requested_at",
             "responsed_at",
@@ -34,6 +39,7 @@ class ChatbotQnaSerializer(serializers.Serializer):
         q_content = validated_data['q_content']
         a_content = validated_data['a_content']
         reference = validated_data['reference']
+        recommended_questions = validated_data['recommended_questions']
         requested_at = validated_data['requested_at']
         responsed_at = validated_data['responsed_at']
         latency_time = validated_data['latency_time']
