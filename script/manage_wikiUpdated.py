@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import requests
 import yaml
 
-from script.utils.parser import Wikiparser
+from utils.parser import Wikiparser
 
 
 def manage_wiki_update(update: bool = False):
