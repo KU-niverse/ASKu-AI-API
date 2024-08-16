@@ -8,7 +8,7 @@ load_dotenv()
 
 if __name__ == '__main__':
     # ---------- < Configuration > ----------
-    with open(os.getenv("DATA_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("DATA_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "Question":
                 data_config: dict = config
@@ -28,7 +28,7 @@ if __name__ == '__main__':
                 questions.append(line)
 
     # ---------- < hook1 > -----------
-    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "Question_SETUP":
                 question_config = config

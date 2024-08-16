@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # ---------- < Configuration > ----------
     exec_args = parser.parse_args()
     
-    with open(os.getenv("DATA_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("DATA_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "Wiki":
                 data_config = config
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # ---------- < hook1 > -----------
     if not exec_args.SETUP: quit()
     
-    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "WIKI_SETUP": 
                 wiki_config = config
