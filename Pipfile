@@ -33,6 +33,9 @@ ragas = "0.1.7"
 celery = "==5.4.0"
 django-celery-beat = "==2.6.0"
 "pdfminer.six" = "==20231228"
+unstructured = "==0.14.0"
+networkx = "==3.3"
+openpyxl = "==3.1.2"
 
 [dev-packages]
 
