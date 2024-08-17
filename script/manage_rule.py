@@ -3,10 +3,9 @@ import os
 from typing import List
 
 from dotenv import load_dotenv
-import yaml
-
 from langchain_community.document_loaders.pdf import PDFMinerLoader
 from langchain_core.documents import Document
+import yaml
 
 from utils.parser import Ruleparser
 
@@ -53,10 +52,10 @@ if __name__ == '__main__':
     from langchain_community.vectorstores.redis import Redis
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
+    embedding = OpenAIEmbeddings()
     Redis.from_texts(texts=rule_parsed,
                      redis_url=rule_config["Vectorstore"]["url"],
                      index_name=rule_config["Vectorstore"]["index_name"],
-                     embedding=Embedding,
+                     embedding=embedding,
                      index_schema=rule_config["Vectorstore"]["index_schema"]
                      )

@@ -64,19 +64,19 @@ def manage_wiki_update(update: bool = False):
     from langchain.indexes import SQLRecordManager, index
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
-    RecordManager = SQLRecordManager(namespace="redis",
+    embedding = OpenAIEmbeddings()
+    record_manager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{RecordManager_path}")
 
     rds = Redis(redis_url=redis_url,
                 index_name=index_name,
-                embedding=Embedding,
+                embedding=embedding,
                 index_schema=index_schema,
                 )
 
     indexing_result = index(docs_source=children,
                             vector_store=rds,
-                            record_manager=RecordManager,
+                            record_manager=record_manager,
                             cleanup="incremental",
                             source_id_key=source_id_key,
                             )

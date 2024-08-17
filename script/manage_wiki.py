@@ -63,19 +63,19 @@ if __name__ == '__main__':
     from langchain_openai.embeddings import OpenAIEmbeddings
 
 
-    Embedding = OpenAIEmbeddings()
-    RecordManager = SQLRecordManager(namespace="redis",
+    embedding = OpenAIEmbeddings()
+    record_manager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{os.path.join(RecordManager_dir, 'RecordManager_'+index_name)}.sql")
-    RecordManager.create_schema()
+    record_manager.create_schema()
     rds = Redis(redis_url=redis_url,
                 index_name=index_name,
-                embedding=Embedding,
+                embedding=embedding,
                 index_schema=index_schema,
                 )
 
     indexing_result = index(docs_source=children,
                             vector_store=rds,
-                            record_manager=RecordManager,
+                            record_manager=record_manager,
                             cleanup="full",
                             source_id_key=source_id_key,
                             )
