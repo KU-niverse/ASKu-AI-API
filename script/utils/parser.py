@@ -254,5 +254,70 @@ class Ruleparser():
                         prfx_stack.append((prfx_level, article.rstrip()))
         
         return prefixed_articles
+
+
+class Calenderparser():
+    repl_patterns: Dict[str, Tuple[Pattern[str], Union[str, Callable]]] = {
+        "line1": (r"\n\n\n\n\n", " "),
+        "line2": (r"\n\n\n", " "),
+        "utf1": ("∼", "~"),
+        "date1": (r"(\d+~\d+)\n([월화수목금토일]~[월화수목금토일])", r"\n\1(\2)"),
+        "date2": (r"(\d+)\n([월화수목금토일])", r"\n\1(\2)"),
+        "year1": (r"2024\n", r"\n2024\n"),
+        "year2": (r"2025\n", r"\n2025\n"),
+        "month1": (r" (\d{1,2})\n", r"\n\1"),
+        "line3": (r"\n\n", r"\n"),
+    }
+
+    def __init__(self, config: dict) -> None:
+        self.config = config
     
+    def parse(
+        self, items: List[Document]) -> List[str]:
+
+        calender_docs: List[Document] = [self.preprocess(item) for item in items]   
+
+        prefixed_calender_docs = []
+
+        for calender_item in calender_docs:
+            prefixed_calender_docs += self.add_Prefix(calender_item)
+
+        return prefixed_calender_docs
     
+    def preprocess(
+        self, calender_item: Document) -> Document:
+
+        calender_content = calender_item.page_content
+        calender_metadata = calender_item.metadata
+
+        for old, new in Calenderparser.repl_patterns.values():
+            calender_content = re.sub(old, new, calender_content)
+
+        return Document(page_content=calender_content, metadata=calender_metadata)
+
+    def add_Prefix(
+        self, calender_item: Document) -> List[str]:
+
+        calender_content = calender_item.page_content
+
+        split_content = re.split("\n", calender_content)
+        split_content = split_content[5:]
+
+        prefixed_content = []
+
+        year, month, date, activity = "", "", "", ""
+
+        for content in split_content:
+            if content.isdigit():
+                if len(content) == 4:
+                    year = content
+                else:
+                    month = content
+            elif re.match(r"\d+~\d+\([월화수목금토일]~[월화수목금토일]\)|\d{1,2}\([월화수목금토일]\)", content):
+                date = content
+            else:
+                activity = content
+
+                prefixed_content.append(f"{activity}: {year}년 {month}월 {date}일")
+            
+        return prefixed_content
