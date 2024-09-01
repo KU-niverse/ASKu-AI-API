@@ -30,9 +30,12 @@ mysqlclient = "==2.2.4"
 redis = "==5.0.4"
 langfuse = "2.29.0"
 ragas = "0.1.7"
-pdfminer.six = "==20231228"
 celery = "==5.4.0"
 django-celery-beat = "==2.6.0"
+"pdfminer.six" = "==20231228"
+unstructured = "==0.14.0"
+networkx = "==3.3"
+openpyxl = "==3.1.2"
 
 [dev-packages]
 

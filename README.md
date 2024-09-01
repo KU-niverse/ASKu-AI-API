@@ -20,6 +20,10 @@ Local Docker Setup과 관련된 절차는 [Notion: Docker Setting](https://www.n
 ├─ chatbot
 ├─ config
 ├─ data
+│  ├─calender
+│  │   └─calender24.xlsx
+│  ├─docstore
+│  │   └─(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
 │  ├─kopas
 │  │   └─raw
 │  ├─rule (생략)
@@ -30,9 +34,9 @@ Local Docker Setup과 관련된 절차는 [Notion: Docker Setting](https://www.n
 │  │   └─제5편 부속기관
 │  ├─schema
 │  │   ├─data_schema.yaml
-│  │   ├─eval_schema.yaml
 │  │   └─manaage_schema.yaml
-│  ├─docstore(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
+│  ├─Questions.txt
+│  ├─docstore_wiki.pickle(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
 │  └─RecordManager(*script 코드를 실행하면 자동적으로 이 위치에 생성됨)
 ├─ script
 │  └─utils
@@ -40,50 +44,48 @@ Local Docker Setup과 관련된 절차는 [Notion: Docker Setting](https://www.n
 ├─ .gitignore
 ├─ manage.py
 ├─ Pipfile
-├─ Pipfile.lock
-└─ systemprompt.txt
+└─ Pipfile.lock
 ```
 
 ##### Dotenv Setting
 Dotenv 파일은 아래의 항목들로 구성되어 있습니다.
 ```
-SECRET_KEY=your-secret-key
-IS_DEVELOP=True
-DJANGO_SETTINGS_MODULE=config.settings pylint --load-plugins pylint_django
+# DJANGO SETTINGS
+SECRET_KEY=
+DEBUG=
+IS_DEVELOP=
+DJANGO_SETTINGS_MODULE=
 
 # DOCKERIZE SETTINGS
-PORT=0000
-USE_DOCKER=True
+PORT=
+USE_DOCKER=
 
 # MYSQL SETTINGS
-MYSQL_NAME=mysql-name
-MYSQL_USER=mysql-user
-MYSQL_PASSWORD=mysql-password
-MYSQL_HOST=mysql-host-address
-MYSQL_PORT=3306
+MYSQL_NAME=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_HOST=
+MYSQL_PORT=
 
 # REDIS SETTINGS
-REDIS_URL=redis://localhost:6379
-REDIS_REQUIREPASS=redis-requirepass
+REDIS_URL=
+RULE_INDEX=
+WIKI_INDEX=
+QUESTION_INDEX=
 
 # OPENAI SETTINGS
-OPENAI_API_KEY=your-openai-api-key
-
-# INDEX
-WIKI_INDEX=WIKI_INDEX
-RULE_INDEX=RULE_INDEX
+OPENAI_API_KEY=
 
 # PATH
-PICKLE_PATH=PICKLE_PATH
+PICKLE_PATH=
+source_id_key=
+DATA_SCHEMA_PATH=
+MANAGE_SCHEMA_PATH=
 
 # LANGFUSE SETTINGS
-LANGFUSE_SECRET_KEY=LANGFUSE_SECRET_KEY
-LANGFUSE_PUBLIC_KEY=LANGFUSE_PUBLIC_KEY
-LANGFUSE_HOST=https://cloud.langfuse.com
-
-# Schema
-DATA_SCHEMA_PATH="./data/schema/data_schema.yaml"
-MANAGE_SCHEMA_PATH="./data/schema/manage_schema.yaml"
+LANGFUSE_SECRET_KEY=
+LANGFUSE_PUBLIC_KEY=
+LANGFUSE_HOST=
 ```
 
 #### 2.2 Environment Setting

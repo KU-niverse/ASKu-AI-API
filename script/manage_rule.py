@@ -3,10 +3,9 @@ import os
 from typing import List
 
 from dotenv import load_dotenv
-import yaml
-
 from langchain_community.document_loaders.pdf import PDFMinerLoader
 from langchain_core.documents import Document
+import yaml
 
 from utils.parser import Ruleparser
 
@@ -20,7 +19,7 @@ if __name__ == '__main__':
     # ---------- < Configuration > ----------
     exec_args = parser.parse_args()
     
-    with open(os.getenv("DATA_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("DATA_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "Rule":
                 data_config: dict = config
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     # ---------- < hook1 > -----------
     if not exec_args.SETUP: quit()
     
-    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "RULE_SETUP": 
                 rule_config = config
@@ -53,10 +52,10 @@ if __name__ == '__main__':
     from langchain_community.vectorstores.redis import Redis
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
+    embedding = OpenAIEmbeddings()
     Redis.from_texts(texts=rule_parsed,
                      redis_url=rule_config["Vectorstore"]["url"],
                      index_name=rule_config["Vectorstore"]["index_name"],
-                     embedding=Embedding,
+                     embedding=embedding,
                      index_schema=rule_config["Vectorstore"]["index_schema"]
                      )

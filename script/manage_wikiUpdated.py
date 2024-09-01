@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 import requests
 import yaml
 
-from script.utils.parser import Wikiparser
+from utils.parser import Wikiparser
 
 
 def manage_wiki_update(update: bool = False):
     # ---------- < Configuration > ----------
-    with open(os.getenv("DATA_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("DATA_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "Wiki":
                 data_config = config
@@ -33,7 +33,7 @@ def manage_wiki_update(update: bool = False):
     # ---------- < hook1 > -----------
     if not update: quit()
 
-    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+") as f:
+    with open(os.getenv("MANAGE_SCHEMA_PATH"), "r+", encoding="utf-8") as f:
         for config in yaml.load_all(stream=f.read(), Loader=yaml.FullLoader):
             if config["Name"] == "WIKI_SETUP":
                 wiki_config = config
@@ -64,19 +64,19 @@ def manage_wiki_update(update: bool = False):
     from langchain.indexes import SQLRecordManager, index
     from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
-    RecordManager = SQLRecordManager(namespace="redis",
+    embedding = OpenAIEmbeddings()
+    record_manager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{RecordManager_path}")
 
     rds = Redis(redis_url=redis_url,
                 index_name=index_name,
-                embedding=Embedding,
+                embedding=embedding,
                 index_schema=index_schema,
                 )
 
     indexing_result = index(docs_source=children,
                             vector_store=rds,
-                            record_manager=RecordManager,
+                            record_manager=record_manager,
                             cleanup="incremental",
                             source_id_key=source_id_key,
                             )
