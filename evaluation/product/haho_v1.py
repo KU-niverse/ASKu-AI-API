@@ -34,7 +34,7 @@ def ready_chain():
     prompt = load_prompt(prompt_name="RAG", prompt_version=1)
     
     # LLM
-    llm = get_OPENAI_llm(temperature=0.7)
+    llm = get_OPENAI_llm(model="gpt-4o-mini", temperature=0.7)
     
     # Generators
     generation_chain = create_stuff_documents_chain(llm=llm, prompt=prompt)

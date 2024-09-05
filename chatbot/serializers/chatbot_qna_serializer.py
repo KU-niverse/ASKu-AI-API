@@ -41,13 +41,13 @@ class ChatbotQnaSerializer(serializers.Serializer):
         reference = validated_data['reference']
         recommended_questions = validated_data['recommended_questions']
         requested_at = validated_data['requested_at']
-        responsed_at = validated_data['responsed_at']
+        responded_at = validated_data['responded_at']
         latency_time = validated_data['latency_time']
 
         with connection.cursor() as cursor:
             sql = """
                 INSERT INTO ai_history (
-                    session_id, q_content, a_content, reference, created_at, requested_at, responsed_at, latency_time
+                    session_id, q_content, a_content, reference, created_at, requested_at, responded_at, latency_time
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
@@ -58,7 +58,7 @@ class ChatbotQnaSerializer(serializers.Serializer):
                 reference,
                 created_at,
                 requested_at,
-                responsed_at,
+                responded_at,
                 latency_time,
             ]
             cursor.execute(sql, values)
