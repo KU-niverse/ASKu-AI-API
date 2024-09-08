@@ -5,6 +5,7 @@ from typing import List
 from dotenv import load_dotenv
 from langchain_community.document_loaders.pdf import PDFMinerLoader
 from langchain_core.documents import Document
+from langchain_openai.embeddings import OpenAIEmbeddings
 import yaml
 
 from utils.parser import Ruleparser
@@ -27,6 +28,7 @@ if __name__ == '__main__':
                 rule_meta: dict = data_config["Metadata"]
     
     rule_dir: str = rule_vars["rule_dir"]
+    embedding = OpenAIEmbeddings(model="text-embedding-3-large")
     
     # ---------- < Load > ----------
     rule_all: List[Document] = []
@@ -50,9 +52,8 @@ if __name__ == '__main__':
 
     # ---------- < Indexing > ----------
     from langchain_community.vectorstores.redis import Redis
-    from langchain_openai.embeddings import OpenAIEmbeddings
 
-    embedding = OpenAIEmbeddings()
+
     Redis.from_texts(texts=rule_parsed,
                      redis_url=rule_config["Vectorstore"]["url"],
                      index_name=rule_config["Vectorstore"]["index_name"],

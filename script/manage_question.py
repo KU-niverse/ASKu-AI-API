@@ -1,6 +1,8 @@
 import os
-import yaml
+
 from dotenv import load_dotenv
+from langchain_openai.embeddings import OpenAIEmbeddings
+import yaml
 
 
 load_dotenv()
@@ -16,6 +18,7 @@ if __name__ == '__main__':
                 question_meta: dict = data_config["Metadata"]
 
     question_file: str = question_vars["question_file"]
+    embedding = OpenAIEmbeddings(model="text-embedding-3-large")
 
     # ---------- < Load > ----------
     file_path = question_file
@@ -35,14 +38,12 @@ if __name__ == '__main__':
 
     # ---------- < Indexing > ----------
     from langchain_community.vectorstores.redis import Redis
-    from langchain_openai.embeddings import OpenAIEmbeddings
 
-    Embedding = OpenAIEmbeddings()
 
     Redis.from_texts(
         texts=questions,
         redis_url=question_config["Vectorstore"]["url"],
         index_name=question_config["Vectorstore"]["index_name"],
-        embedding=Embedding,
+        embedding=embedding,
         index_schema=question_config["Vectorstore"]["index_schema"]
     )
