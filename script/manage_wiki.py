@@ -2,6 +2,7 @@ import argparse
 import os
 
 from dotenv import load_dotenv
+from langchain_openai.embeddings import OpenAIEmbeddings
 import requests
 import yaml
 
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     wiki_url = wiki_vars["setup_url"]
     source_id_key = wiki_vars["source_id_key"]
     wiki_schema = wiki_meta["schema"]
+    embedding = OpenAIEmbeddings(model="text-embedding-3-large")
 
     # ---------- < Load > ----------
     response = requests.get(wiki_url)
@@ -60,10 +62,8 @@ if __name__ == '__main__':
     # ---------- < Indexing > ----------
     from langchain_community.vectorstores.redis import Redis
     from langchain.indexes import SQLRecordManager, index
-    from langchain_openai.embeddings import OpenAIEmbeddings
 
 
-    embedding = OpenAIEmbeddings()
     record_manager = SQLRecordManager(namespace="redis",
                                      db_url=f"sqlite:///{os.path.join(RecordManager_dir, 'RecordManager_'+index_name)}.sql")
     record_manager.create_schema()

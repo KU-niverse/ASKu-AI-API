@@ -91,6 +91,7 @@ class ChatbotCreateAPIView(ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            print(e)
             end_result = ai_session_end(session_id, self.is_limit, user_id == 0)
             if not end_result:
                 raise DatabaseError

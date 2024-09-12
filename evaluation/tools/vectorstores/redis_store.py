@@ -7,7 +7,6 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 
 class RedisStore(ABC):
     redis_url = os.getenv("REDIS_URL")
-    embedding = OpenAIEmbeddings()
     
     @abstractmethod
     def get_redis_store(self) -> Redis:
@@ -17,10 +16,10 @@ class RedisStore(ABC):
 class RuleRedisStore(RedisStore):
     schema = {}
 
-    def get_redis_store(self, index_name) -> Redis:
+    def get_redis_store(self, index_name, embedding) -> Redis:
         rule_redis = Redis(
             redis_url=RedisStore.redis_url,
-            embedding=RedisStore.embedding,
+            embedding=embedding,
             index_name=index_name,
             index_schema=self.schema
         )
@@ -35,10 +34,10 @@ class WikiRedisStore(RedisStore):
             ]  
         }
     
-    def get_redis_store(self, index_name) -> Redis:
+    def get_redis_store(self, index_name, embedding) -> Redis:
         wiki_redis = Redis(
             redis_url=RedisStore.redis_url,
-            embedding=RedisStore.embedding,
+            embedding=embedding,
             index_name=index_name,
             index_schema=self.schema
         )
@@ -48,10 +47,10 @@ class WikiRedisStore(RedisStore):
 class QuestionRedisStore(RedisStore):
     schema = {}
 
-    def get_redis_store(self, index_name) -> Redis:
+    def get_redis_store(self, index_name, embedding) -> Redis:
         question_redis = Redis(
             redis_url=RedisStore.redis_url,
-            embedding=RedisStore.embedding,
+            embedding=embedding,
             index_name=index_name,
             index_schema=self.schema
         )
