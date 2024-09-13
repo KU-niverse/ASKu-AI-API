@@ -48,13 +48,8 @@ def ready_chain():
         base_compressor=compressor, base_retriever=wiki_retriever
     )
 
-    merger_retriever = MergerRetriever(
+    retrieval_chain = MergerRetriever(
         retrievers=[rule_retriever, wiki_retriever_small, compressed_retriever]
-    )
-
-    reranker = FlashrankRerank()
-    retrieval_chain = ContextualCompressionRetriever(
-        base_compressor=reranker, base_retriever=merger_retriever
     )
 
     # Prompt
