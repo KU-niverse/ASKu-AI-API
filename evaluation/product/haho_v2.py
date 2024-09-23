@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
 from langchain.retrievers import ContextualCompressionRetriever, MergerRetriever
-from langchain.retrievers.document_compressors import FlashrankRerank, LLMChainExtractor
+from langchain.retrievers.document_compressors import LLMChainExtractor
 from langchain_openai.embeddings import OpenAIEmbeddings
 
 from ..tools.generators.llm import get_OPENAI_llm
