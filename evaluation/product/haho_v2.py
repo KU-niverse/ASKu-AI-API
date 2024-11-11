@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
 from langchain.retrievers import ContextualCompressionRetriever, MergerRetriever
-from langchain.retrievers.document_compressors import FlashrankRerank, LLMChainExtractor
+from langchain.retrievers.document_compressors import LLMChainExtractor
 from langchain_openai.embeddings import OpenAIEmbeddings
 
 from ..tools.generators.llm import get_OPENAI_llm
@@ -48,13 +48,8 @@ def ready_chain():
         base_compressor=compressor, base_retriever=wiki_retriever
     )
 
-    merger_retriever = MergerRetriever(
+    retrieval_chain = MergerRetriever(
         retrievers=[rule_retriever, wiki_retriever_small, compressed_retriever]
-    )
-
-    reranker = FlashrankRerank()
-    retrieval_chain = ContextualCompressionRetriever(
-        base_compressor=reranker, base_retriever=merger_retriever
     )
 
     # Prompt
